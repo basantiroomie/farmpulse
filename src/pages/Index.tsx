@@ -105,13 +105,14 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <img src="https://images.unsplash.com/photo-1516048015710-7a3b4c86be36?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
-                alt="Farmer with livestock" 
-                className="rounded-lg shadow-lg object-cover h-96 w-full" 
+              <img 
+                src="/lovable-uploads/b8d8f866-bd7f-4198-af40-b2d36a972f4f.png" 
+                alt="Cattle resting in field" 
+                className="rounded-lg shadow-lg object-cover w-full aspect-[4/3]" 
               />
             </div>
             <div className="space-y-6">
-              <h2 className="text-3xl font-bold mb-4">Why Choose Animon Health?</h2>
+              <h2 className="text-3xl font-bold mb-4">Why Choose FarmPulse AI?</h2>
               
               <div className="space-y-4">
                 <div className="flex gap-3">

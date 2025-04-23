@@ -4,7 +4,7 @@ import ROIForm from "@/components/ROI/ROIForm";
 const ROI = () => {
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="max-w-3xl mx-auto mb-12">
+      <div className="max-w-3xl mx-auto mb-12 text-center">
         <h1 className="text-3xl font-bold mb-3">ROI Calculator</h1>
         <p className="text-lg text-muted-foreground">
           Estimate the return on investment for implementing our animal health monitoring system 
@@ -12,7 +12,7 @@ const ROI = () => {
         </p>
       </div>
       
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <ROIForm />
         
         <div className="mt-12 bg-muted p-6 rounded-lg">
