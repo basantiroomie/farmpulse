@@ -1,3 +1,4 @@
+
 // Sample data for 7 days of animal health metrics
 export const mockHealthData = {
   heartRate: [72, 74, 73, 90, 102, 98, 95], // Infection pattern
@@ -43,26 +44,28 @@ export const getHealthStatus = (value: number, metricType: keyof typeof healthRa
   const ranges = healthRanges[metricType];
   
   if (metricType === 'heartRate') {
-    if (value <= ranges.normal.max) return 'normal';
-    if (value <= ranges.warning.max) return 'warning';
+    if (value <= ranges.heartRate.normal.max) return 'normal';
+    if (value <= ranges.heartRate.warning.max) return 'warning';
     return 'critical';
   }
   
   if (metricType === 'temperature') {
-    if (value <= ranges.normal.max) return 'normal';
-    if (value <= ranges.warning.max) return 'warning';
+    if (value <= ranges.temperature.normal.max) return 'normal';
+    if (value <= ranges.temperature.warning.max) return 'warning';
     return 'critical';
   }
   
   if (metricType === 'activity') {
-    if (value >= ranges.normal.min) return 'normal';
-    if (value >= ranges.warning.min) return 'warning';
+    if (value >= ranges.activity.normal.min) return 'normal';
+    if (value >= ranges.activity.warning.min) return 'warning';
     return 'critical';
   }
   
   if (metricType === 'pregnancy') {
-    if (value >= ranges.pregnancy.fetalHeartRate.normal.min && value <= ranges.pregnancy.fetalHeartRate.normal.max) return 'normal';
-    if (value >= ranges.pregnancy.fetalHeartRate.warning.min && value <= ranges.pregnancy.fetalHeartRate.warning.max) return 'warning';
+    // Specifically check fetal heart rate
+    const fetalRanges = ranges.pregnancy.fetalHeartRate;
+    if (value >= fetalRanges.normal.min && value <= fetalRanges.normal.max) return 'normal';
+    if (value >= fetalRanges.warning.min && value <= fetalRanges.warning.max) return 'warning';
     return 'critical';
   }
   
