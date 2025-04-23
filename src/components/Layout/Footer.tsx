@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="container mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4">Animon Health</h3>
+            <h3 className="text-lg font-semibold mb-4">FarmPulse AI</h3>
             <p className="text-sm text-muted-foreground mb-4">
               Advanced animal health monitoring solutions for early disease detection and improved herd management.
             </p>
@@ -17,7 +17,6 @@ const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li><Link to="/" className="hover:text-primary transition-colors">Home</Link></li>
               <li><Link to="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link></li>
-              <li><Link to="/product" className="hover:text-primary transition-colors">Product</Link></li>
               <li><Link to="/roi" className="hover:text-primary transition-colors">ROI Calculator</Link></li>
             </ul>
           </div>
@@ -41,7 +40,7 @@ const Footer = () => {
         </div>
         <div className="mt-8 pt-6 border-t border-border">
           <p className="text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Animon Health. All rights reserved.
+            © {new Date().getFullYear()} FarmPulse AI. All rights reserved.
           </p>
         </div>
       </div>

@@ -8,7 +8,6 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
-import Product from "./pages/Product";
 import ROI from "./pages/ROI";
 import Support from "./pages/Support";
 import Contact from "./pages/Contact";
@@ -21,7 +20,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="animal-health-theme">
+    <ThemeProvider defaultTheme="light" storageKey="farmpulse-theme">
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -32,7 +31,6 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/product" element={<Product />} />
                 <Route path="/roi" element={<ROI />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/contact" element={<Contact />} />

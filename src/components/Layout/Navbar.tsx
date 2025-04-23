@@ -15,7 +15,6 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Dashboard", path: "/dashboard" },
-    { name: "Product", path: "/product" },
     { name: "ROI Calculator", path: "/roi" },
     { name: "Support", path: "/support" },
     { name: "Contact", path: "/contact" },
@@ -26,8 +25,8 @@ const Navbar = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-primary">Animon</span>
-            <span className="text-xl font-light">Health</span>
+            <span className="text-2xl font-bold text-primary">FarmPulse</span>
+            <span className="text-xl font-light">AI</span>
           </Link>
         </div>
 
