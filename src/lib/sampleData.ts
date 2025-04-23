@@ -1,9 +1,15 @@
-
 // Sample data for 7 days of animal health metrics
 export const mockHealthData = {
   heartRate: [72, 74, 73, 90, 102, 98, 95], // Infection pattern
   temperature: [38.5, 38.7, 39, 39.5, 40, 40.2, 40.3], // Fever
   activity: [8, 8, 7, 5, 3, 2, 1], // Mobility issue
+  pregnancy: {
+    status: "Confirmed",
+    gestationDays: 150,
+    expectedDueDate: "2025-09-20",
+    lastCheckup: "2025-04-15",
+    fetalHeartRate: 175, // Normal range: 170-190 bpm
+  }
 };
 
 // Reference ranges for health metrics
@@ -23,6 +29,13 @@ export const healthRanges = {
     warning: { min: 4, max: 7 },
     // Below 4 is considered critical
   },
+  pregnancy: {
+    fetalHeartRate: {
+      normal: { min: 170, max: 190 },
+      warning: { min: 160, max: 200 },
+      // Below 160 or above 200 is considered critical
+    }
+  }
 };
 
 // Helper function to get status based on value and ranges
@@ -44,6 +57,12 @@ export const getHealthStatus = (value: number, metricType: keyof typeof healthRa
   if (metricType === 'activity') {
     if (value >= ranges.normal.min) return 'normal';
     if (value >= ranges.warning.min) return 'warning';
+    return 'critical';
+  }
+  
+  if (metricType === 'pregnancy') {
+    if (value >= ranges.pregnancy.fetalHeartRate.normal.min && value <= ranges.pregnancy.fetalHeartRate.normal.max) return 'normal';
+    if (value >= ranges.pregnancy.fetalHeartRate.warning.min && value <= ranges.pregnancy.fetalHeartRate.warning.max) return 'warning';
     return 'critical';
   }
   
@@ -72,5 +91,11 @@ export const metricsInfo = {
     unit: 'score',
     description: 'Movement level (0-10)',
     icon: 'activity'
+  },
+  pregnancy: {
+    title: 'Pregnancy Status',
+    unit: 'days',
+    description: 'Gestation progress and health',
+    icon: 'baby'
   }
 };

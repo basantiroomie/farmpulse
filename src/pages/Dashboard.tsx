@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardCard from "@/components/Dashboard/DashboardCard";
 import VitalsChart from "@/components/Dashboard/VitalsChart";
 import { mockHealthData } from "@/lib/sampleData";
+import { Baby } from "lucide-react";
 
 const Dashboard = () => {
   const [selectedAnimal, setSelectedAnimal] = useState("A12345");
@@ -42,7 +43,7 @@ const Dashboard = () => {
       </div>
       
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <DashboardCard
           title="Temperature"
           value={latestTemperature}
@@ -67,6 +68,42 @@ const Dashboard = () => {
           metricType="activity"
           onClick={() => handleViewHistory("activity")}
         />
+        
+        {/* New Pregnancy Card */}
+        <Card className="transition-all hover:shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-lg font-medium">Pregnancy Status</CardTitle>
+            <div className="px-2 py-1 rounded-md bg-primary/20 text-primary border border-primary/30 text-xs font-medium flex items-center gap-1">
+              <Baby className="h-4 w-4" />
+              {mockHealthData.pregnancy.status}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col space-y-4">
+              <div>
+                <div className="text-3xl font-bold">
+                  {mockHealthData.pregnancy.gestationDays}
+                  <span className="text-sm font-normal text-muted-foreground"> days</span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">Gestation Progress</p>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Due Date:</span>
+                  <span className="font-medium">{mockHealthData.pregnancy.expectedDueDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Fetal HR:</span>
+                  <span className="font-medium">{mockHealthData.pregnancy.fetalHeartRate} bpm</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Last Check:</span>
+                  <span className="font-medium">{mockHealthData.pregnancy.lastCheckup}</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
       
       {/* Chart Section */}

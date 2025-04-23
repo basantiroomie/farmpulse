@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -168,24 +167,6 @@ const Index = () => {
                 <Link to="/dashboard">View Sample Dashboard</Link>
               </Button>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-primary text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Animal Health Management?</h2>
-          <p className="text-lg opacity-90 max-w-2xl mx-auto mb-8">
-            Join hundreds of farms already benefiting from our advanced health monitoring system.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button asChild size="lg" variant="secondary">
-              <Link to="/contact">Request a Demo</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-              <Link to="/support">Learn About Implementation</Link>
-            </Button>
           </div>
         </div>
       </section>
