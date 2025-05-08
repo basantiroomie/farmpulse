@@ -38,7 +38,7 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
         const fetchedAnimals = await fetchAllAnimals();
         console.log("Fetched animals:", fetchedAnimals);
         
-        // Always ensure animals is an array
+        // Always ensure animals is an array and not undefined
         const validAnimals = Array.isArray(fetchedAnimals) ? fetchedAnimals : [];
         setAnimals(validAnimals);
         
@@ -71,17 +71,20 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
     };
     
     getAnimals();
-  }, []);
+  }, [selectedAnimal, onAnimalChange, toast]);
 
   const getSelectedAnimalName = () => {
+    if (!animals || animals.length === 0) return selectedAnimal || "Select animal...";
     const animal = animals.find(a => a.id === selectedAnimal);
-    return animal ? `${animal.name} (${animal.id})` : selectedAnimal;
+    return animal ? `${animal.name} (${animal.id})` : selectedAnimal || "Select animal...";
   };
 
   // Ensure we have a valid animals array before filtering
+  // Safeguard for animals being undefined or null
+  const safeAnimals = Array.isArray(animals) ? animals : [];
   const filteredAnimals = searchValue === "" 
-    ? animals 
-    : animals.filter((animal) => {
+    ? safeAnimals 
+    : safeAnimals.filter((animal) => {
         return animal.name.toLowerCase().includes(searchValue.toLowerCase()) || 
                animal.id.toLowerCase().includes(searchValue.toLowerCase());
       });
@@ -96,7 +99,7 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
           className="w-full justify-between"
           disabled={loading}
         >
-          {loading ? "Loading..." : selectedAnimal ? getSelectedAnimalName() : "Select animal..."}
+          {loading ? "Loading..." : getSelectedAnimalName()}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -109,7 +112,8 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
           />
           <CommandEmpty>No animal found.</CommandEmpty>
           <CommandGroup>
-            {filteredAnimals.map((animal) => (
+            {/* Always ensure we're mapping over a valid array */}
+            {(filteredAnimals || []).map((animal) => (
               <CommandItem
                 key={animal.id}
                 value={animal.id}

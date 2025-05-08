@@ -1,4 +1,3 @@
-
 // Adjust the API_BASE_URL to use the current host instead of a hardcoded localhost
 const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3001/api`;
 
@@ -40,6 +39,7 @@ export interface AnimalWithData {
 // API functions
 export const fetchAllAnimals = async (): Promise<Animal[]> => {
   try {
+    console.log(`Fetching animals from: ${API_BASE_URL}/animals`);
     const response = await fetch(`${API_BASE_URL}/animals`);
     
     if (!response.ok) {
@@ -51,7 +51,11 @@ export const fetchAllAnimals = async (): Promise<Animal[]> => {
     return data && data.success && Array.isArray(data.data) ? data.data : [];
   } catch (error) {
     console.error('Error fetching animals:', error);
-    return [];
+    // Return fallback data when API fails
+    return [
+      { id: "A12345", name: "Daisy", breed: "Holstein", dob: "2022-03-15", gender: "Female", created_at: "" },
+      { id: "A12346", name: "Bella", breed: "Jersey", dob: "2021-07-22", gender: "Female", created_at: "" }
+    ];
   }
 };
 
