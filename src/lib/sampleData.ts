@@ -48,7 +48,8 @@ export const getHealthStatus = (value: number, metricType: keyof typeof healthRa
   }
   
   if (metricType === 'pregnancy') {
-    const fetalRanges = ranges.pregnancy.fetalHeartRate;
+    // Handle the nested structure for pregnancy data
+    const fetalRanges = ranges.fetalHeartRate;
     if (value >= fetalRanges.normal.min && value <= fetalRanges.normal.max) return 'normal';
     if (value >= fetalRanges.warning.min && value <= fetalRanges.warning.max) return 'warning';
     return 'critical';
