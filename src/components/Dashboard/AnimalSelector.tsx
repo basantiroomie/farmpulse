@@ -38,33 +38,25 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
         const fetchedAnimals = await fetchAllAnimals();
         console.log("Fetched animals:", fetchedAnimals);
         
-        // Always ensure animals is an array and not undefined
+        // Always ensure animals is an array
         const validAnimals = Array.isArray(fetchedAnimals) ? fetchedAnimals : [];
         setAnimals(validAnimals);
         
-        // Select first animal if none selected
+        // Select first animal if none selected and we have animals
         if (!selectedAnimal && validAnimals.length > 0) {
           onAnimalChange(validAnimals[0].id);
         }
       } catch (error) {
         console.error("Error fetching animals:", error);
-        // Set some dummy data if API fails
-        const fallbackAnimals = [
-          { id: "A12345", name: "Daisy", breed: "Holstein", dob: "2022-03-15", gender: "Female", created_at: "" },
-          { id: "A12346", name: "Bella", breed: "Jersey", dob: "2021-07-22", gender: "Female", created_at: "" }
-        ];
-        setAnimals(fallbackAnimals);
+        
+        // Use empty array as fallback
+        setAnimals([]);
         
         toast({
           title: "Error fetching animals",
-          description: "Using fallback animal data",
+          description: "Could not load animal data. Please try again later.",
           variant: "destructive",
         });
-        
-        // Select first animal if none selected
-        if (!selectedAnimal) {
-          onAnimalChange(fallbackAnimals[0].id);
-        }
       } finally {
         setLoading(false);
       }
@@ -73,14 +65,14 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
     getAnimals();
   }, [selectedAnimal, onAnimalChange, toast]);
 
+  // Safe getter for selected animal name
   const getSelectedAnimalName = () => {
     if (!animals || animals.length === 0) return selectedAnimal || "Select animal...";
     const animal = animals.find(a => a.id === selectedAnimal);
     return animal ? `${animal.name} (${animal.id})` : selectedAnimal || "Select animal...";
   };
 
-  // Guard against undefined values to prevent the "undefined is not iterable" error
-  // Initialize with empty arrays if undefined
+  // Initialize with guaranteed arrays to prevent "undefined is not iterable" error
   const safeAnimals = Array.isArray(animals) ? animals : [];
   const filteredAnimals = searchValue === "" 
     ? safeAnimals 
@@ -110,28 +102,31 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
             value={searchValue}
             onValueChange={setSearchValue}
           />
-          <CommandEmpty>No animal found.</CommandEmpty>
-          <CommandGroup>
-            {filteredAnimals.map((animal) => (
-              <CommandItem
-                key={animal.id}
-                value={animal.id}
-                onSelect={(currentValue) => {
-                  onAnimalChange(currentValue);
-                  setOpen(false);
-                  setSearchValue("");  // Clear search when an item is selected
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    selectedAnimal === animal.id ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {animal.name} ({animal.id})
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          {filteredAnimals.length === 0 ? (
+            <CommandEmpty>No animal found.</CommandEmpty>
+          ) : (
+            <CommandGroup>
+              {filteredAnimals.map((animal) => (
+                <CommandItem
+                  key={animal.id}
+                  value={animal.id}
+                  onSelect={(currentValue) => {
+                    onAnimalChange(currentValue);
+                    setOpen(false);
+                    setSearchValue(""); // Clear search when item selected
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      selectedAnimal === animal.id ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {animal.name} ({animal.id})
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
         </Command>
       </PopoverContent>
     </Popover>
