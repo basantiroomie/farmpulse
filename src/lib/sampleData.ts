@@ -27,21 +27,22 @@ export const healthRanges = {
 
 // Helper function to get status based on value and ranges
 export const getHealthStatus = (value: number, metricType: keyof typeof healthRanges) => {
-  const ranges = healthRanges[metricType];
-  
   if (metricType === 'heartRate') {
+    const ranges = healthRanges.heartRate;
     if (value <= ranges.normal.max) return 'normal';
     if (value <= ranges.warning.max) return 'warning';
     return 'critical';
   }
   
   if (metricType === 'temperature') {
+    const ranges = healthRanges.temperature;
     if (value <= ranges.normal.max) return 'normal';
     if (value <= ranges.warning.max) return 'warning';
     return 'critical';
   }
   
   if (metricType === 'activity') {
+    const ranges = healthRanges.activity;
     if (value >= ranges.normal.min) return 'normal';
     if (value >= ranges.warning.min) return 'warning';
     return 'critical';
@@ -49,7 +50,7 @@ export const getHealthStatus = (value: number, metricType: keyof typeof healthRa
   
   if (metricType === 'pregnancy') {
     // Handle the nested structure for pregnancy data
-    const fetalRanges = ranges.fetalHeartRate;
+    const fetalRanges = healthRanges.pregnancy.fetalHeartRate;
     if (value >= fetalRanges.normal.min && value <= fetalRanges.normal.max) return 'normal';
     if (value >= fetalRanges.warning.min && value <= fetalRanges.warning.max) return 'warning';
     return 'critical';
