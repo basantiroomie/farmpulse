@@ -3,21 +3,23 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { mockHealthData, dayLabels, healthRanges } from "@/lib/sampleData";
+import { healthRanges } from "@/lib/sampleData";
+import { HealthData } from "@/lib/api";
 
 interface VitalsChartProps {
-  animalId?: string;
+  animalId: string;
+  healthData: HealthData[];
 }
 
-const VitalsChart = ({ animalId = "A12345" }: VitalsChartProps) => {
+const VitalsChart = ({ animalId, healthData }: VitalsChartProps) => {
   const [activeMetric, setActiveMetric] = useState<"heartRate" | "temperature" | "activity">("temperature");
   
   // Format the data for the chart
-  const chartData = dayLabels.map((day, index) => ({
-    name: day,
-    heartRate: mockHealthData.heartRate[index],
-    temperature: mockHealthData.temperature[index],
-    activity: mockHealthData.activity[index],
+  const chartData = healthData.map((data) => ({
+    name: new Date(data.date).toLocaleDateString(),
+    heartRate: data.heart_rate,
+    temperature: data.temperature,
+    activity: data.activity,
   }));
 
   // Define the display settings for each metric
@@ -47,7 +49,8 @@ const VitalsChart = ({ animalId = "A12345" }: VitalsChartProps) => {
 
   // Get domain for Y axis based on metric
   const getYAxisDomain = (metric: "heartRate" | "temperature" | "activity") => {
-    const values = mockHealthData[metric];
+    const metricKey = metric === 'heartRate' ? 'heart_rate' : metric;
+    const values = healthData.map(data => data[metricKey as keyof HealthData] as number);
     const min = Math.min(...values) * 0.9;
     const max = Math.max(...values) * 1.1;
     return [min, max];

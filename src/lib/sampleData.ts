@@ -1,18 +1,5 @@
-// Sample data for 7 days of animal health metrics
-export const mockHealthData = {
-  heartRate: [72, 74, 73, 90, 102, 98, 95], // Infection pattern
-  temperature: [38.5, 38.7, 39, 39.5, 40, 40.2, 40.3], // Fever
-  activity: [8, 8, 7, 5, 3, 2, 1], // Mobility issue
-  pregnancy: {
-    status: "Confirmed",
-    gestationDays: 150,
-    expectedDueDate: "2025-09-20",
-    lastCheckup: "2025-04-15",
-    fetalHeartRate: 175, // Normal range: 170-190 bpm
-  }
-};
 
-// Reference ranges for health metrics
+// Health ranges for animal health metrics
 export const healthRanges = {
   heartRate: {
     normal: { min: 60, max: 80 },
