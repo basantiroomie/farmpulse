@@ -11,7 +11,7 @@ import { fetchAllAnimalData, fetchAnimalPregnancyStats, AnimalWithData, Pregnanc
 import { Baby, Loader2 } from "lucide-react";
 
 const Dashboard = () => {
-  const [selectedAnimal, setSelectedAnimal] = useState("A12346"); // Default to Bella (has pregnancy stats)
+  const [selectedAnimal, setSelectedAnimal] = useState("A12348"); // Default to Bella (has pregnancy stats)
   const [activeChart, setActiveChart] = useState<"heartRate" | "temperature" | "activity">("temperature");
   const [animalData, setAnimalData] = useState<AnimalWithData | null>(null);
   const [pregnancyStats, setPregnancyStats] = useState<PregnancyStat[]>([]);
@@ -25,7 +25,8 @@ const Dashboard = () => {
       setLoading(true);
       
       try {
-        const data = await fetchAllAnimalData(selectedAnimal);
+        // Wrap API call in a Promise.resolve() to handle any synchronous errors
+        const data = await Promise.resolve().then(() => fetchAllAnimalData(selectedAnimal));
         
         if (data) {
           setAnimalData(data);
@@ -33,8 +34,10 @@ const Dashboard = () => {
           // If this animal is pregnant, fetch pregnancy stats
           if (data.pregnancyData?.status === "Confirmed") {
             try {
-              const stats = await fetchAnimalPregnancyStats(selectedAnimal);
-              setPregnancyStats(stats);
+              const stats = await Promise.resolve().then(() => 
+                fetchAnimalPregnancyStats(selectedAnimal)
+              );
+              setPregnancyStats(stats || []);
             } catch (error) {
               console.error("Error fetching pregnancy stats:", error);
               setPregnancyStats([]);
@@ -108,8 +111,8 @@ const Dashboard = () => {
     };
     
     getAnimalData();
-  }, [selectedAnimal]);
-
+  }, [selectedAnimal, toast]); // Remove any other dependencies
+  
   const handleViewHistory = (metric: "heartRate" | "temperature" | "activity") => {
     setActiveChart(metric);
     // Scroll to chart
@@ -153,10 +156,24 @@ const Dashboard = () => {
         </div>
         
         <div className="mt-4 md:mt-0 w-full md:w-64">
-          <AnimalSelector 
-            selectedAnimal={selectedAnimal} 
-            onAnimalChange={setSelectedAnimal} 
-          />
+          {/* Wrap in an error boundary div */}
+          <div className="relative">
+            <AnimalSelector 
+              selectedAnimal={selectedAnimal} 
+              onAnimalChange={(id) => {
+                try {
+                  setSelectedAnimal(id);
+                } catch (e) {
+                  console.error("Error setting selected animal:", e);
+                  toast({
+                    title: "Error",
+                    description: "There was a problem selecting the animal.",
+                    variant: "destructive",
+                  });
+                }
+              }} 
+            />
+          </div>
         </div>
       </div>
       
