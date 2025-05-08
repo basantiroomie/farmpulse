@@ -113,7 +113,7 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
           <CommandEmpty>No animal found.</CommandEmpty>
           <CommandGroup>
             {/* Always ensure we're mapping over a valid array */}
-            {(filteredAnimals || []).map((animal) => (
+            {filteredAnimals.map((animal) => (
               <CommandItem
                 key={animal.id}
                 value={animal.id}
