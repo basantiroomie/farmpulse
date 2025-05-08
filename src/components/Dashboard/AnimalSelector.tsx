@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { fetchAllAnimals } from "@/lib/api";
 import { Animal } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface AnimalSelectorProps {
   selectedAnimal: string;
@@ -28,6 +29,7 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchValue, setSearchValue] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     const getAnimals = async () => {
@@ -35,19 +37,31 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
       try {
         const fetchedAnimals = await fetchAllAnimals();
         console.log("Fetched animals:", fetchedAnimals);
-        setAnimals(fetchedAnimals);
+        setAnimals(fetchedAnimals || []);
         
         // Select first animal if none selected
-        if (!selectedAnimal && fetchedAnimals.length > 0) {
+        if (!selectedAnimal && fetchedAnimals && fetchedAnimals.length > 0) {
           onAnimalChange(fetchedAnimals[0].id);
         }
       } catch (error) {
         console.error("Error fetching animals:", error);
         // Set some dummy data if API fails
-        setAnimals([
+        const fallbackAnimals = [
           { id: "A12345", name: "Daisy", breed: "Holstein", dob: "2022-03-15", gender: "Female", created_at: "" },
           { id: "A12346", name: "Bella", breed: "Jersey", dob: "2021-07-22", gender: "Female", created_at: "" }
-        ]);
+        ];
+        setAnimals(fallbackAnimals);
+        
+        toast({
+          title: "Error fetching animals",
+          description: "Using fallback animal data",
+          variant: "destructive",
+        });
+        
+        // Select first animal if none selected
+        if (!selectedAnimal) {
+          onAnimalChange(fallbackAnimals[0].id);
+        }
       } finally {
         setLoading(false);
       }
@@ -61,12 +75,15 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
     return animal ? `${animal.name} (${animal.id})` : selectedAnimal;
   };
 
-  const filteredAnimals = searchValue === "" 
-    ? animals 
-    : animals.filter((animal) => {
-        return animal.name.toLowerCase().includes(searchValue.toLowerCase()) || 
-               animal.id.toLowerCase().includes(searchValue.toLowerCase());
-      });
+  // Ensure we have a valid animals array before filtering
+  const filteredAnimals = animals && animals.length > 0
+    ? searchValue === "" 
+      ? animals 
+      : animals.filter((animal) => {
+          return animal.name.toLowerCase().includes(searchValue.toLowerCase()) || 
+                 animal.id.toLowerCase().includes(searchValue.toLowerCase());
+        })
+    : [];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -89,27 +106,31 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
             value={searchValue}
             onValueChange={setSearchValue}
           />
-          <CommandEmpty>No animal found.</CommandEmpty>
-          <CommandGroup>
-            {filteredAnimals.map((animal) => (
-              <CommandItem
-                key={animal.id}
-                value={animal.id}
-                onSelect={(currentValue) => {
-                  onAnimalChange(currentValue);
-                  setOpen(false);
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    selectedAnimal === animal.id ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {animal.name} ({animal.id})
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          {filteredAnimals.length === 0 ? (
+            <CommandEmpty>No animal found.</CommandEmpty>
+          ) : (
+            <CommandGroup>
+              {filteredAnimals.map((animal) => (
+                <CommandItem
+                  key={animal.id}
+                  value={animal.id}
+                  onSelect={(currentValue) => {
+                    onAnimalChange(currentValue);
+                    setOpen(false);
+                    setSearchValue("");
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      selectedAnimal === animal.id ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {animal.name} ({animal.id})
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
         </Command>
       </PopoverContent>
     </Popover>
