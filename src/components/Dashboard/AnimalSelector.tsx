@@ -49,12 +49,16 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
       } catch (error) {
         console.error("Error fetching animals:", error);
         
-        // Use empty array as fallback
-        setAnimals([]);
+        // Use fallback array as safety measure
+        const fallbackAnimals = [
+          { id: "A12345", name: "Daisy", breed: "Holstein", dob: "2022-03-15", gender: "Female", created_at: "" },
+          { id: "A12346", name: "Bella", breed: "Jersey", dob: "2021-07-22", gender: "Female", created_at: "" }
+        ];
+        setAnimals(fallbackAnimals);
         
         toast({
           title: "Error fetching animals",
-          description: "Could not load animal data. Please try again later.",
+          description: "Using fallback animal data. Please check network connection.",
           variant: "destructive",
         });
       } finally {
@@ -73,13 +77,13 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
   };
 
   // Initialize with guaranteed arrays to prevent "undefined is not iterable" error
-  const safeAnimals = Array.isArray(animals) ? animals : [];
+  const safeAnimals = animals || [];
   const filteredAnimals = searchValue === "" 
     ? safeAnimals 
     : safeAnimals.filter((animal) => {
-        return animal.name.toLowerCase().includes(searchValue.toLowerCase()) || 
-               animal.id.toLowerCase().includes(searchValue.toLowerCase());
-      });
+        return animal?.name?.toLowerCase().includes(searchValue.toLowerCase()) || 
+               animal?.id?.toLowerCase().includes(searchValue.toLowerCase());
+      }) || [];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -102,7 +106,7 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
             value={searchValue}
             onValueChange={setSearchValue}
           />
-          {filteredAnimals.length === 0 ? (
+          {!filteredAnimals || filteredAnimals.length === 0 ? (
             <CommandEmpty>No animal found.</CommandEmpty>
           ) : (
             <CommandGroup>

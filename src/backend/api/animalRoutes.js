@@ -60,12 +60,28 @@ router.get('/animals/:id/pregnancy', (req, res) => {
           gestation_days: 0,
           expected_due_date: '',
           last_checkup: '',
-          fetal_heart_rate: 0
+          fetal_heart_rate: 0,
+          notes: ''
         } 
       });
     }
     
     res.json({ success: true, data: pregnancyData });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get pregnancy stats for an animal (detailed daily data)
+router.get('/animals/:id/pregnancy-stats', (req, res) => {
+  try {
+    const pregnancyStats = db.prepare(`
+      SELECT * FROM pregnancy_stats 
+      WHERE animal_id = ? 
+      ORDER BY date ASC
+    `).all(req.params.id);
+    
+    res.json({ success: true, data: pregnancyStats });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -91,18 +107,27 @@ router.get('/animals/:id/all-data', (req, res) => {
       WHERE animal_id = ?
     `).get(req.params.id);
     
+    const pregnancyStats = db.prepare(`
+      SELECT * FROM pregnancy_stats 
+      WHERE animal_id = ? 
+      ORDER BY date ASC
+    `).all(req.params.id);
+    
     res.json({ 
       success: true, 
       data: {
         animal,
         healthData,
         pregnancyData: pregnancyData || {
+          animal_id: req.params.id,
           status: 'Unknown',
           gestation_days: 0,
           expected_due_date: '',
           last_checkup: '',
-          fetal_heart_rate: 0
-        }
+          fetal_heart_rate: 0,
+          notes: ''
+        },
+        pregnancyStats: pregnancyStats || []
       }
     });
   } catch (error) {

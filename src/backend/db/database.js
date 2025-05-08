@@ -49,6 +49,22 @@ const initDatabase = () => {
       expected_due_date TEXT,
       last_checkup TEXT,
       fetal_heart_rate REAL,
+      notes TEXT,
+      FOREIGN KEY (animal_id) REFERENCES animals (id)
+    )
+  `);
+
+  // Create Pregnancy Stats table for daily tracking
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS pregnancy_stats (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      animal_id TEXT,
+      date TEXT,
+      temperature REAL,
+      heart_rate REAL,
+      fetal_heart_rate REAL,
+      activity REAL,
+      notes TEXT,
       FOREIGN KEY (animal_id) REFERENCES animals (id)
     )
   `);
@@ -58,6 +74,7 @@ const initDatabase = () => {
   // Clear existing data to avoid duplicates on restart
   db.prepare('DELETE FROM health_data').run();
   db.prepare('DELETE FROM pregnancy_data').run();
+  db.prepare('DELETE FROM pregnancy_stats').run();
   db.prepare('DELETE FROM animals').run();
   
   // Insert sample data
@@ -130,13 +147,39 @@ function insertSampleData() {
   }
   
   // Insert pregnancy data
-  const insertPregnancyData = db.prepare('INSERT INTO pregnancy_data (animal_id, status, gestation_days, expected_due_date, last_checkup, fetal_heart_rate) VALUES (?, ?, ?, ?, ?, ?)');
+  const insertPregnancyData = db.prepare('INSERT INTO pregnancy_data (animal_id, status, gestation_days, expected_due_date, last_checkup, fetal_heart_rate, notes) VALUES (?, ?, ?, ?, ?, ?, ?)');
   
-  insertPregnancyData.run('A12345', 'Confirmed', 150, '2025-09-20', '2025-04-15', 175);
-  insertPregnancyData.run('A12346', 'Confirmed', 90, '2025-11-15', '2025-04-10', 180);
-  insertPregnancyData.run('A12347', 'Not Pregnant', 0, '', '', 0);
-  insertPregnancyData.run('A12348', 'Confirmed', 210, '2025-07-25', '2025-04-05', 158); // Slightly low fetal heart rate
-  insertPregnancyData.run('A12349', 'Not Pregnant', 0, '', '', 0);
+  insertPregnancyData.run('A12345', 'Confirmed', 150, '2025-09-20', '2025-04-15', 175, 'Healthy pregnancy');
+  insertPregnancyData.run('A12346', 'Confirmed', 90, '2025-11-15', '2025-04-10', 180, 'Normal development');
+  insertPregnancyData.run('A12347', 'Not Pregnant', 0, '', '', 0, '');
+  insertPregnancyData.run('A12348', 'Confirmed', 210, '2025-07-25', '2025-04-05', 158, 'Slightly low fetal heart rate, monitoring');
+  insertPregnancyData.run('A12349', 'Not Pregnant', 0, '', '', 0, '');
+  
+  // Insert detailed pregnancy stats for Bella (A12346) - 14 days of data
+  const insertPregnancyStats = db.prepare('INSERT INTO pregnancy_stats (animal_id, date, temperature, heart_rate, fetal_heart_rate, activity, notes) VALUES (?, ?, ?, ?, ?, ?, ?)');
+  
+  // Generate two weeks of data for Bella's pregnancy
+  const twoWeeksAgo = new Date();
+  twoWeeksAgo.setDate(today.getDate() - 14);
+  
+  for (let i = 0; i < 14; i++) {
+    const date = new Date(twoWeeksAgo);
+    date.setDate(twoWeeksAgo.getDate() + i);
+    const dateStr = date.toISOString().split('T')[0];
+    
+    // Create slightly varying data for Bella
+    const temp = 38.3 + (Math.random() * 0.4 - 0.2).toFixed(1) * 1; // 38.1-38.7
+    const hr = 74 + Math.floor(Math.random() * 7 - 3); // 71-78
+    const fhr = 175 + Math.floor(Math.random() * 11 - 5); // 170-180
+    const act = 8 + (Math.random() * 2 - 1).toFixed(1) * 1; // 7-9
+    
+    let note = 'Normal daily check';
+    if (i === 3) note = 'Slight decrease in appetite';
+    if (i === 7) note = 'Increased water intake';
+    if (i === 10) note = 'Fetal movement observed';
+    
+    insertPregnancyStats.run('A12346', dateStr, temp, hr, fhr, act, note);
+  }
   
   console.log("Enhanced sample data inserted successfully");
 }

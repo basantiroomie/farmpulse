@@ -87,5 +87,11 @@ export const metricsInfo = {
     unit: 'days',
     description: 'Gestation progress and health',
     icon: 'baby'
+  },
+  fetalHeartRate: {
+    title: 'Fetal Heart Rate',
+    unit: 'bpm',
+    description: 'Fetal heart beats per minute',
+    icon: 'heart-pulse'
   }
 };

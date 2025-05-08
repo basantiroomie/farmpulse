@@ -37,12 +37,25 @@ export interface PregnancyData {
   expected_due_date: string;
   last_checkup: string;
   fetal_heart_rate: number;
+  notes?: string;
+}
+
+export interface PregnancyStat {
+  id: number;
+  animal_id: string;
+  date: string;
+  temperature: number;
+  heart_rate: number;
+  fetal_heart_rate: number;
+  activity: number;
+  notes: string;
 }
 
 export interface AnimalWithData {
   animal: Animal;
   healthData: HealthData[];
   pregnancyData: PregnancyData;
+  pregnancyStats?: PregnancyStat[];
 }
 
 // Fallback data to use when API fails
@@ -70,8 +83,33 @@ const getDefaultPregnancyData = (animalId: string): PregnancyData => ({
   gestation_days: 0,
   expected_due_date: "",
   last_checkup: "",
-  fetal_heart_rate: 0
+  fetal_heart_rate: 0,
+  notes: ""
 });
+
+// Fallback pregnancy stats data
+const getDefaultPregnancyStats = (animalId: string): PregnancyStat[] => {
+  const stats: PregnancyStat[] = [];
+  const today = new Date();
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date();
+    date.setDate(today.getDate() - (6 - i));
+    
+    stats.push({
+      id: i + 1,
+      animal_id: animalId,
+      date: date.toISOString().split('T')[0],
+      temperature: 38.5,
+      heart_rate: 75,
+      fetal_heart_rate: 170,
+      activity: 8,
+      notes: "Fallback data"
+    });
+  }
+  
+  return stats;
+};
 
 // API functions with improved error handling
 export const fetchAllAnimals = async (): Promise<Animal[]> => {
@@ -151,6 +189,24 @@ export const fetchAnimalPregnancyData = async (animalId: string): Promise<Pregna
   }
 };
 
+export const fetchAnimalPregnancyStats = async (animalId: string): Promise<PregnancyStat[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/animals/${animalId}/pregnancy-stats`, {
+      signal: AbortSignal.timeout(3000)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error fetching pregnancy stats for animal ${animalId}: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    return data.success && Array.isArray(data.data) ? data.data : getDefaultPregnancyStats(animalId);
+  } catch (error) {
+    console.error(`Error fetching pregnancy stats for animal ${animalId}:`, error);
+    return getDefaultPregnancyStats(animalId);
+  }
+};
+
 export const fetchAllAnimalData = async (animalId: string): Promise<AnimalWithData | null> => {
   try {
     const response = await fetch(`${API_BASE_URL}/animals/${animalId}/all-data`, {
@@ -184,7 +240,8 @@ export const fetchAllAnimalData = async (animalId: string): Promise<AnimalWithDa
     return {
       animal,
       healthData: getDefaultHealthData(animalId),
-      pregnancyData: getDefaultPregnancyData(animalId)
+      pregnancyData: getDefaultPregnancyData(animalId),
+      pregnancyStats: getDefaultPregnancyStats(animalId)
     };
   }
 };

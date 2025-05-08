@@ -4,15 +4,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardCard from "@/components/Dashboard/DashboardCard";
 import VitalsChart from "@/components/Dashboard/VitalsChart";
+import PregnancyStatsChart from "@/components/Dashboard/PregnancyStatsChart";
 import AnimalSelector from "@/components/Dashboard/AnimalSelector";
 import { useToast } from "@/hooks/use-toast";
-import { fetchAllAnimalData, AnimalWithData } from "@/lib/api";
+import { fetchAllAnimalData, fetchAnimalPregnancyStats, AnimalWithData, PregnancyStat } from "@/lib/api";
 import { Baby, Loader2 } from "lucide-react";
 
 const Dashboard = () => {
-  const [selectedAnimal, setSelectedAnimal] = useState("A12345");
+  const [selectedAnimal, setSelectedAnimal] = useState("A12346"); // Default to Bella (has pregnancy stats)
   const [activeChart, setActiveChart] = useState<"heartRate" | "temperature" | "activity">("temperature");
   const [animalData, setAnimalData] = useState<AnimalWithData | null>(null);
+  const [pregnancyStats, setPregnancyStats] = useState<PregnancyStat[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -27,6 +29,19 @@ const Dashboard = () => {
         
         if (data) {
           setAnimalData(data);
+          
+          // If this animal is pregnant, fetch pregnancy stats
+          if (data.pregnancyData?.status === "Confirmed") {
+            try {
+              const stats = await fetchAnimalPregnancyStats(selectedAnimal);
+              setPregnancyStats(stats);
+            } catch (error) {
+              console.error("Error fetching pregnancy stats:", error);
+              setPregnancyStats([]);
+            }
+          } else {
+            setPregnancyStats([]);
+          }
         } else {
           // Create fallback data if API returns null
           setAnimalData({
@@ -49,10 +64,11 @@ const Dashboard = () => {
             }
           });
           
+          setPregnancyStats([]);
+          
           toast({
             title: "Warning",
             description: `Using fallback data for animal ${selectedAnimal}`,
-            // Change from "warning" to "default" since "warning" is not a supported variant
             variant: "default",
           });
         }
@@ -78,6 +94,8 @@ const Dashboard = () => {
             fetal_heart_rate: 0
           }
         });
+        
+        setPregnancyStats([]);
         
         toast({
           title: "Error loading animal data",
@@ -122,6 +140,9 @@ const Dashboard = () => {
       </div>
     );
   }
+
+  // Check if the selected animal has pregnancy stats
+  const showPregnancyStats = animalData?.pregnancyData?.status === "Confirmed" && pregnancyStats.length > 0;
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -199,6 +220,12 @@ const Dashboard = () => {
                       <span className="text-muted-foreground">Last Check:</span>
                       <span className="font-medium">{animalData.pregnancyData.last_checkup}</span>
                     </div>
+                    {animalData.pregnancyData.notes && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Notes:</span>
+                        <span className="font-medium text-right">{animalData.pregnancyData.notes}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -220,6 +247,20 @@ const Dashboard = () => {
           />
         )}
       </div>
+
+      {/* Pregnancy Stats Chart - Only show if there's pregnancy data */}
+      {showPregnancyStats && (
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">Pregnancy Vitals History</h2>
+          <PregnancyStatsChart
+            animalId={selectedAnimal}
+            pregnancyStats={pregnancyStats}
+          />
+          <div className="mt-4 text-sm text-muted-foreground">
+            <p>Showing 14-day pregnancy monitoring data for {animalData?.animal?.name}</p>
+          </div>
+        </div>
+      )}
       
       {/* Additional Information */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
