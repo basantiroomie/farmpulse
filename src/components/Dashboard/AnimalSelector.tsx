@@ -79,8 +79,8 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
     return animal ? `${animal.name} (${animal.id})` : selectedAnimal || "Select animal...";
   };
 
-  // Ensure we have a valid animals array before filtering
-  // Safeguard for animals being undefined or null
+  // Guard against undefined values to prevent the "undefined is not iterable" error
+  // Initialize with empty arrays if undefined
   const safeAnimals = Array.isArray(animals) ? animals : [];
   const filteredAnimals = searchValue === "" 
     ? safeAnimals 
@@ -112,7 +112,6 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
           />
           <CommandEmpty>No animal found.</CommandEmpty>
           <CommandGroup>
-            {/* Always ensure we're mapping over a valid array */}
             {filteredAnimals.map((animal) => (
               <CommandItem
                 key={animal.id}
@@ -120,7 +119,7 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
                 onSelect={(currentValue) => {
                   onAnimalChange(currentValue);
                   setOpen(false);
-                  setSearchValue("");
+                  setSearchValue("");  // Clear search when an item is selected
                 }}
               >
                 <Check
