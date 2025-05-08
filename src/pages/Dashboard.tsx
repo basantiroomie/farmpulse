@@ -19,6 +19,7 @@ const Dashboard = () => {
   // Get animal data
   useEffect(() => {
     const getAnimalData = async () => {
+      if (!selectedAnimal) return;
       setLoading(true);
       
       try {
@@ -27,17 +28,59 @@ const Dashboard = () => {
         if (data) {
           setAnimalData(data);
         } else {
+          // Create fallback data if API returns null
+          setAnimalData({
+            animal: {
+              id: selectedAnimal,
+              name: "Unknown Animal",
+              breed: "Unknown",
+              dob: new Date().toISOString().split('T')[0],
+              gender: "Unknown",
+              created_at: new Date().toISOString()
+            },
+            healthData: [],
+            pregnancyData: {
+              animal_id: selectedAnimal,
+              status: "Unknown",
+              gestation_days: 0,
+              expected_due_date: "",
+              last_checkup: "",
+              fetal_heart_rate: 0
+            }
+          });
+          
           toast({
-            title: "Error loading animal data",
-            description: `Could not load data for animal ${selectedAnimal}`,
-            variant: "destructive",
+            title: "Warning",
+            description: `Using fallback data for animal ${selectedAnimal}`,
+            variant: "warning",
           });
         }
       } catch (error) {
         console.error("Error loading animal data:", error);
+        // Create fallback data
+        setAnimalData({
+          animal: {
+            id: selectedAnimal,
+            name: "Unknown Animal",
+            breed: "Unknown",
+            dob: new Date().toISOString().split('T')[0],
+            gender: "Unknown",
+            created_at: new Date().toISOString()
+          },
+          healthData: [],
+          pregnancyData: {
+            animal_id: selectedAnimal,
+            status: "Unknown",
+            gestation_days: 0,
+            expected_due_date: "",
+            last_checkup: "",
+            fetal_heart_rate: 0
+          }
+        });
+        
         toast({
           title: "Error loading animal data",
-          description: "Could not connect to the server",
+          description: "Using fallback data - check server connection",
           variant: "destructive",
         });
       } finally {

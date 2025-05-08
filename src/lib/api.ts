@@ -1,5 +1,6 @@
 
-const API_BASE_URL = 'http://localhost:3001/api';
+// Adjust the API_BASE_URL to use the current host instead of a hardcoded localhost
+const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:3001/api`;
 
 // Type definitions
 export interface Animal {
