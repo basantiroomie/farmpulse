@@ -1,11 +1,16 @@
-
 // Use a different approach to set the API base URL that works in various environments
 const getApiBaseUrl = () => {
   // Use window.location to get the current protocol and hostname
   const { protocol, hostname } = window.location;
   
   // For development environments, use the specific port
-  return `${protocol}//${hostname}:3001/api`;
+  // Check if we're running on localhost or a development environment
+  if (hostname === 'localhost' || hostname.includes('lovableproject.com')) {
+    return `${protocol}//${hostname}:3001/api`;
+  }
+  
+  // For production environment (adjust as needed)
+  return `${protocol}//${hostname}/api`;
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -61,7 +66,10 @@ export interface AnimalWithData {
 // Fallback data to use when API fails
 const fallbackAnimals = [
   { id: "A12345", name: "Daisy", breed: "Holstein", dob: "2022-03-15", gender: "Female", created_at: "" },
-  { id: "A12346", name: "Bella", breed: "Jersey", dob: "2021-07-22", gender: "Female", created_at: "" }
+  { id: "A12346", name: "Bella", breed: "Jersey", dob: "2021-07-22", gender: "Female", created_at: "" },
+  { id: "A12347", name: "Max", breed: "Angus", dob: "2022-01-10", gender: "Male", created_at: "" },
+  { id: "A12348", name: "Rosie", breed: "Hereford", dob: "2023-02-05", gender: "Female", created_at: "" },
+  { id: "A12349", name: "Duke", breed: "Brahman", dob: "2022-09-18", gender: "Male", created_at: "" }
 ];
 
 // Fallback health data
@@ -117,7 +125,7 @@ export const fetchAllAnimals = async (): Promise<Animal[]> => {
     console.log(`Fetching animals from: ${API_BASE_URL}/animals`);
     const response = await fetch(`${API_BASE_URL}/animals`, {
       // Add a timeout to prevent long hanging requests
-      signal: AbortSignal.timeout(3000)
+      signal: AbortSignal.timeout(5000)
     });
     
     if (!response.ok) {
@@ -192,7 +200,7 @@ export const fetchAnimalPregnancyData = async (animalId: string): Promise<Pregna
 export const fetchAnimalPregnancyStats = async (animalId: string): Promise<PregnancyStat[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/animals/${animalId}/pregnancy-stats`, {
-      signal: AbortSignal.timeout(3000)
+      signal: AbortSignal.timeout(5000)
     });
     
     if (!response.ok) {

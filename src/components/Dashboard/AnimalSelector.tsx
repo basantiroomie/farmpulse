@@ -38,7 +38,7 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
         const fetchedAnimals = await fetchAllAnimals();
         console.log("Fetched animals:", fetchedAnimals);
         
-        // Always ensure animals is an array
+        // Always ensure animals is a valid array
         const validAnimals = Array.isArray(fetchedAnimals) ? fetchedAnimals : [];
         setAnimals(validAnimals);
         
@@ -76,14 +76,14 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
     return animal ? `${animal.name} (${animal.id})` : selectedAnimal || "Select animal...";
   };
 
-  // Initialize with guaranteed arrays to prevent "undefined is not iterable" error
+  // Make sure we're using arrays for filtering to prevent "undefined is not iterable" error
   const safeAnimals = animals || [];
   const filteredAnimals = searchValue === "" 
     ? safeAnimals 
     : safeAnimals.filter((animal) => {
         return animal?.name?.toLowerCase().includes(searchValue.toLowerCase()) || 
                animal?.id?.toLowerCase().includes(searchValue.toLowerCase());
-      }) || [];
+      });
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

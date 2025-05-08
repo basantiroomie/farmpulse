@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const { db } = require('../db/database');
@@ -81,7 +80,8 @@ router.get('/animals/:id/pregnancy-stats', (req, res) => {
       ORDER BY date ASC
     `).all(req.params.id);
     
-    res.json({ success: true, data: pregnancyStats });
+    // If no data found, return an empty array rather than null
+    res.json({ success: true, data: pregnancyStats || [] });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
