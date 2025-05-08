@@ -47,7 +47,8 @@ export const fetchAllAnimals = async (): Promise<Animal[]> => {
     }
     
     const data = await response.json();
-    return data.success && Array.isArray(data.data) ? data.data : [];
+    // Ensure we always return an array, even if data is unexpected
+    return data && data.success && Array.isArray(data.data) ? data.data : [];
   } catch (error) {
     console.error('Error fetching animals:', error);
     return [];

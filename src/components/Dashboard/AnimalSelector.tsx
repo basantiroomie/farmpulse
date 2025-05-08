@@ -37,11 +37,14 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
       try {
         const fetchedAnimals = await fetchAllAnimals();
         console.log("Fetched animals:", fetchedAnimals);
-        setAnimals(fetchedAnimals || []);
+        
+        // Always ensure animals is an array
+        const validAnimals = Array.isArray(fetchedAnimals) ? fetchedAnimals : [];
+        setAnimals(validAnimals);
         
         // Select first animal if none selected
-        if (!selectedAnimal && fetchedAnimals && fetchedAnimals.length > 0) {
-          onAnimalChange(fetchedAnimals[0].id);
+        if (!selectedAnimal && validAnimals.length > 0) {
+          onAnimalChange(validAnimals[0].id);
         }
       } catch (error) {
         console.error("Error fetching animals:", error);
@@ -76,14 +79,12 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
   };
 
   // Ensure we have a valid animals array before filtering
-  const filteredAnimals = animals && animals.length > 0
-    ? searchValue === "" 
-      ? animals 
-      : animals.filter((animal) => {
-          return animal.name.toLowerCase().includes(searchValue.toLowerCase()) || 
-                 animal.id.toLowerCase().includes(searchValue.toLowerCase());
-        })
-    : [];
+  const filteredAnimals = searchValue === "" 
+    ? animals 
+    : animals.filter((animal) => {
+        return animal.name.toLowerCase().includes(searchValue.toLowerCase()) || 
+               animal.id.toLowerCase().includes(searchValue.toLowerCase());
+      });
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -106,31 +107,28 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
             value={searchValue}
             onValueChange={setSearchValue}
           />
-          {filteredAnimals.length === 0 ? (
-            <CommandEmpty>No animal found.</CommandEmpty>
-          ) : (
-            <CommandGroup>
-              {filteredAnimals.map((animal) => (
-                <CommandItem
-                  key={animal.id}
-                  value={animal.id}
-                  onSelect={(currentValue) => {
-                    onAnimalChange(currentValue);
-                    setOpen(false);
-                    setSearchValue("");
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      selectedAnimal === animal.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {animal.name} ({animal.id})
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
+          <CommandEmpty>No animal found.</CommandEmpty>
+          <CommandGroup>
+            {filteredAnimals.map((animal) => (
+              <CommandItem
+                key={animal.id}
+                value={animal.id}
+                onSelect={(currentValue) => {
+                  onAnimalChange(currentValue);
+                  setOpen(false);
+                  setSearchValue("");
+                }}
+              >
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    selectedAnimal === animal.id ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                {animal.name} ({animal.id})
+              </CommandItem>
+            ))}
+          </CommandGroup>
         </Command>
       </PopoverContent>
     </Popover>
