@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardCard from "@/components/Dashboard/DashboardCard";
 import VitalsChart from "@/components/Dashboard/VitalsChart";
 import AnimalSelector from "@/components/Dashboard/AnimalSelector";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { fetchAllAnimalData, AnimalWithData } from "@/lib/api";
 import { Baby, Loader2 } from "lucide-react";
 
@@ -52,7 +52,8 @@ const Dashboard = () => {
           toast({
             title: "Warning",
             description: `Using fallback data for animal ${selectedAnimal}`,
-            variant: "warning",
+            // Change from "warning" to "default" since "warning" is not a supported variant
+            variant: "default",
           });
         }
       } catch (error) {
