@@ -1,7 +1,13 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+
+// Start the backend server when Vite starts
+import('./src/backend/start-server.js').catch(err => {
+  console.error('Failed to start backend server:', err);
+});
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({

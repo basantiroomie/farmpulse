@@ -55,22 +55,26 @@ const initDatabase = () => {
   
   console.log("Database initialized successfully");
   
-  // Insert sample data if tables are empty
-  const animalCount = db.prepare('SELECT COUNT(*) as count FROM animals').get();
-  if (animalCount.count === 0) {
-    insertSampleData();
-  }
+  // Clear existing data to avoid duplicates on restart
+  db.prepare('DELETE FROM health_data').run();
+  db.prepare('DELETE FROM pregnancy_data').run();
+  db.prepare('DELETE FROM animals').run();
+  
+  // Insert sample data
+  insertSampleData();
 };
 
-// Insert sample data for testing
+// Insert enhanced sample data for testing
 function insertSampleData() {
-  console.log("Inserting sample data");
+  console.log("Inserting enhanced sample data");
   
-  // Insert sample animals
+  // Insert sample animals - expanding to 5 animals
   const animals = [
     { id: 'A12345', name: 'Daisy', breed: 'Holstein', dob: '2022-03-15', gender: 'Female' },
     { id: 'A12346', name: 'Bella', breed: 'Jersey', dob: '2021-07-22', gender: 'Female' },
-    { id: 'A12347', name: 'Max', breed: 'Angus', dob: '2022-01-10', gender: 'Male' }
+    { id: 'A12347', name: 'Max', breed: 'Angus', dob: '2022-01-10', gender: 'Male' },
+    { id: 'A12348', name: 'Rosie', breed: 'Hereford', dob: '2023-02-05', gender: 'Female' },
+    { id: 'A12349', name: 'Duke', breed: 'Brahman', dob: '2022-09-18', gender: 'Male' }
   ];
   
   const insertAnimal = db.prepare('INSERT INTO animals (id, name, breed, dob, gender) VALUES (?, ?, ?, ?, ?)');
@@ -102,19 +106,27 @@ function insertSampleData() {
   const temperatureA12347 = [38.4, 38.5, 38.7, 38.9, 39.2, 39.1, 38.9];
   const activityA12347 = [8, 7, 6, 6, 5, 6, 7];
   
+  // Sample data for A12348 - showing pregnancy with complications
+  const heartRateA12348 = [77, 79, 82, 85, 84, 88, 90];
+  const temperatureA12348 = [38.6, 38.7, 38.8, 38.7, 39.0, 39.2, 39.4];
+  const activityA12348 = [7, 7, 6, 6, 5, 5, 4];
+  
+  // Sample data for A12349 - showing recovery from illness
+  const heartRateA12349 = [95, 92, 88, 84, 80, 77, 75];
+  const temperatureA12349 = [40.1, 39.8, 39.5, 39.2, 38.9, 38.7, 38.5];
+  const activityA12349 = [3, 4, 5, 6, 7, 8, 8];
+  
   for (let i = 0; i < 7; i++) {
     const date = new Date();
     date.setDate(today.getDate() - (6 - i));
     const dateStr = date.toISOString().split('T')[0];
     
-    // Insert data for animal A12345
+    // Insert data for all animals
     insertHealthData.run('A12345', dateStr, heartRateA12345[i], temperatureA12345[i], activityA12345[i]);
-    
-    // Insert data for animal A12346
     insertHealthData.run('A12346', dateStr, heartRateA12346[i], temperatureA12346[i], activityA12346[i]);
-    
-    // Insert data for animal A12347
     insertHealthData.run('A12347', dateStr, heartRateA12347[i], temperatureA12347[i], activityA12347[i]);
+    insertHealthData.run('A12348', dateStr, heartRateA12348[i], temperatureA12348[i], activityA12348[i]);
+    insertHealthData.run('A12349', dateStr, heartRateA12349[i], temperatureA12349[i], activityA12349[i]);
   }
   
   // Insert pregnancy data
@@ -123,8 +135,10 @@ function insertSampleData() {
   insertPregnancyData.run('A12345', 'Confirmed', 150, '2025-09-20', '2025-04-15', 175);
   insertPregnancyData.run('A12346', 'Confirmed', 90, '2025-11-15', '2025-04-10', 180);
   insertPregnancyData.run('A12347', 'Not Pregnant', 0, '', '', 0);
+  insertPregnancyData.run('A12348', 'Confirmed', 210, '2025-07-25', '2025-04-05', 158); // Slightly low fetal heart rate
+  insertPregnancyData.run('A12349', 'Not Pregnant', 0, '', '', 0);
   
-  console.log("Sample data inserted successfully");
+  console.log("Enhanced sample data inserted successfully");
 }
 
 // Initialize the database
