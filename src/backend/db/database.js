@@ -1,7 +1,11 @@
+import Database from 'better-sqlite3';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Ensure the data directory exists
 const dbDir = path.join(__dirname, 'data');
@@ -187,7 +191,5 @@ function insertSampleData() {
 // Initialize the database
 initDatabase();
 
-module.exports = {
-  db,
-  initDatabase
-};
+// Export using ES modules syntax
+export { db, initDatabase };

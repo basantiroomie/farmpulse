@@ -1,7 +1,7 @@
+import express from 'express';
+import { db } from '../db/database.js';
 
-const express = require('express');
 const router = express.Router();
-const { db } = require('../db/database');
 
 // Get all animals
 router.get('/animals', (req, res) => {
@@ -135,4 +135,4 @@ router.get('/animals/:id/all-data', (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
