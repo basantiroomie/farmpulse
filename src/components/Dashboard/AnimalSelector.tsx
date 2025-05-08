@@ -38,7 +38,7 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
         const fetchedAnimals = await fetchAllAnimals();
         console.log("Fetched animals:", fetchedAnimals);
         
-        // Always ensure animals is an array
+        // Always ensure animals is a valid array
         const validAnimals = Array.isArray(fetchedAnimals) ? fetchedAnimals : [];
         setAnimals(validAnimals);
         
@@ -72,18 +72,21 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
   // Safe getter for selected animal name
   const getSelectedAnimalName = () => {
     if (!animals || animals.length === 0) return selectedAnimal || "Select animal...";
-    const animal = animals.find(a => a.id === selectedAnimal);
+    const animal = animals.find(a => a?.id === selectedAnimal);
     return animal ? `${animal.name} (${animal.id})` : selectedAnimal || "Select animal...";
   };
 
-  // Initialize with guaranteed arrays to prevent "undefined is not iterable" error
-  const safeAnimals = animals || [];
+  // Ensure we always have a valid, empty array even when nothing is defined
+  const safeAnimals = Array.isArray(animals) ? animals : [];
+  
+  // Explicitly define empty arrays to prevent undefined being returned
   const filteredAnimals = searchValue === "" 
     ? safeAnimals 
     : safeAnimals.filter((animal) => {
-        return animal?.name?.toLowerCase().includes(searchValue.toLowerCase()) || 
-               animal?.id?.toLowerCase().includes(searchValue.toLowerCase());
-      }) || [];
+        if (!animal) return false;
+        return (animal.name?.toLowerCase().includes(searchValue.toLowerCase()) || 
+               animal.id?.toLowerCase().includes(searchValue.toLowerCase()));
+      });
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -111,23 +114,25 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
           ) : (
             <CommandGroup>
               {filteredAnimals.map((animal) => (
-                <CommandItem
-                  key={animal.id}
-                  value={animal.id}
-                  onSelect={(currentValue) => {
-                    onAnimalChange(currentValue);
-                    setOpen(false);
-                    setSearchValue(""); // Clear search when item selected
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      selectedAnimal === animal.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {animal.name} ({animal.id})
-                </CommandItem>
+                animal && (
+                  <CommandItem
+                    key={animal.id}
+                    value={animal.id}
+                    onSelect={(currentValue) => {
+                      onAnimalChange(currentValue);
+                      setOpen(false);
+                      setSearchValue(""); // Clear search when item selected
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        selectedAnimal === animal.id ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {animal.name} ({animal.id})
+                  </CommandItem>
+                )
               ))}
             </CommandGroup>
           )}

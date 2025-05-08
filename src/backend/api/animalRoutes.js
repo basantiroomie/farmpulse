@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/animals', (req, res) => {
   try {
     const animals = db.prepare('SELECT * FROM animals').all();
-    res.json({ success: true, data: animals });
+    res.json({ success: true, data: animals || [] }); // Ensure we always return an array
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -37,7 +37,7 @@ router.get('/animals/:id/health', (req, res) => {
       ORDER BY date ASC
     `).all(req.params.id);
     
-    res.json({ success: true, data: healthData });
+    res.json({ success: true, data: healthData || [] }); // Ensure we always return an array
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -81,7 +81,8 @@ router.get('/animals/:id/pregnancy-stats', (req, res) => {
       ORDER BY date ASC
     `).all(req.params.id);
     
-    res.json({ success: true, data: pregnancyStats });
+    // Always return an array, never null or undefined
+    res.json({ success: true, data: pregnancyStats || [] });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -100,7 +101,7 @@ router.get('/animals/:id/all-data', (req, res) => {
       SELECT * FROM health_data 
       WHERE animal_id = ? 
       ORDER BY date ASC
-    `).all(req.params.id);
+    `).all(req.params.id) || [];
     
     const pregnancyData = db.prepare(`
       SELECT * FROM pregnancy_data 
@@ -111,13 +112,13 @@ router.get('/animals/:id/all-data', (req, res) => {
       SELECT * FROM pregnancy_stats 
       WHERE animal_id = ? 
       ORDER BY date ASC
-    `).all(req.params.id);
+    `).all(req.params.id) || [];
     
     res.json({ 
       success: true, 
       data: {
         animal,
-        healthData,
+        healthData: healthData,
         pregnancyData: pregnancyData || {
           animal_id: req.params.id,
           status: 'Unknown',
