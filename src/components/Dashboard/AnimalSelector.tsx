@@ -76,14 +76,15 @@ const AnimalSelector = ({ selectedAnimal, onAnimalChange }: AnimalSelectorProps)
     return animal ? `${animal.name} (${animal.id})` : selectedAnimal || "Select animal...";
   };
 
-  // Make sure we're using arrays for filtering to prevent "undefined is not iterable" error
+  // Ensure we always have a valid, empty array even when nothing is defined
   const safeAnimals = animals || [];
+  // Explicitly define empty arrays to prevent undefined being returned
   const filteredAnimals = searchValue === "" 
     ? safeAnimals 
     : safeAnimals.filter((animal) => {
         return animal?.name?.toLowerCase().includes(searchValue.toLowerCase()) || 
                animal?.id?.toLowerCase().includes(searchValue.toLowerCase());
-      });
+      }) || [];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
