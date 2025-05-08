@@ -5,7 +5,8 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // Start the backend server when Vite starts
-import('./src/backend/start-server.js').catch(err => {
+// Using type assertion to handle JS import in TS file
+import('./src/backend/start-server.js' as any).catch(err => {
   console.error('Failed to start backend server:', err);
 });
 
