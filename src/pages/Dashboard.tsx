@@ -11,7 +11,7 @@ import { fetchAllAnimalData, fetchAnimalPregnancyStats, AnimalWithData, Pregnanc
 import { Baby, Loader2 } from "lucide-react";
 
 const Dashboard = () => {
-  const [selectedAnimal, setSelectedAnimal] = useState("A12348"); // Default to Bella (has pregnancy stats)
+  const [selectedAnimal, setSelectedAnimal] = useState("A12347"); // Default to Bella (has pregnancy stats)
   const [activeChart, setActiveChart] = useState<"heartRate" | "temperature" | "activity">("temperature");
   const [animalData, setAnimalData] = useState<AnimalWithData | null>(null);
   const [pregnancyStats, setPregnancyStats] = useState<PregnancyStat[]>([]);
