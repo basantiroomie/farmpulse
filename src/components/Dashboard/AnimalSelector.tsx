@@ -97,26 +97,26 @@ const AnimalSelector = ({
   return (
     <div className={`relative ${className}`}>
       {label && (
-        <label className="text-sm font-medium mb-1 block">
+        <label className="text-sm font-medium mb-1 block text-foreground">
           {label}
         </label>
       )}
       
-      {/* Button selector */}
+      {/* Button selector - Updated with theme-aware colors */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full justify-between items-center px-3 py-2 border rounded-md bg-white"
+        className="flex w-full justify-between items-center px-3 py-2 border rounded-md bg-background text-foreground"
       >
         <span>{getSelectedAnimalName()}</span>
         <span className="ml-2">▼</span>
       </button>
       
-      {/* Dropdown */}
+      {/* Dropdown - Updated with theme-aware colors */}
       {isOpen && (
         <div 
           ref={dropdownRef}
-          className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg"
+          className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg"
         >
           {/* Search input */}
           <div className="p-2 border-b">
@@ -126,7 +126,7 @@ const AnimalSelector = ({
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               placeholder="Search animals..."
-              className="w-full px-2 py-1 border rounded"
+              className="w-full px-2 py-1 border rounded bg-background text-foreground"
               autoFocus
             />
           </div>
@@ -134,21 +134,21 @@ const AnimalSelector = ({
           {/* Animal list */}
           <div className="max-h-64 overflow-y-auto">
             {filteredAnimals.length === 0 ? (
-              <div className="p-2 text-center text-gray-500">No animals found</div>
+              <div className="p-2 text-center text-muted-foreground">No animals found</div>
             ) : (
               filteredAnimals.map((animal) => (
                 <div
                   key={animal.id}
                   onClick={() => handleSelect(animal.id)}
-                  className={`flex justify-between p-2 cursor-pointer hover:bg-gray-100 ${
-                    selectedAnimal === animal.id ? 'bg-blue-50' : ''
+                  className={`flex justify-between p-2 cursor-pointer hover:bg-accent text-foreground ${
+                    selectedAnimal === animal.id ? 'bg-primary/20' : ''
                   }`}
                 >
                   <div>
                     <span className="font-medium">{animal.name}</span>
-                    <span className="text-gray-500"> ({animal.id})</span>
+                    <span className="text-muted-foreground"> ({animal.id})</span>
                   </div>
-                  <span className="text-sm text-gray-500">{animal.gender}</span>
+                  <span className="text-sm text-muted-foreground">{animal.gender}</span>
                 </div>
               ))
             )}
