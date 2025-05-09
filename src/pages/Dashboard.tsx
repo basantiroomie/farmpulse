@@ -1,14 +1,13 @@
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DashboardCard from "@/components/Dashboard/DashboardCard";
-import VitalsChart from "@/components/Dashboard/VitalsChart";
-import PregnancyStatsChart from "@/components/Dashboard/PregnancyStatsChart";
 import AnimalSelector from "@/components/Dashboard/AnimalSelector";
+import DashboardCard from "@/components/Dashboard/DashboardCard";
+import PregnancyStatsChart from "@/components/Dashboard/PregnancyStatsChart";
+import VitalsChart from "@/components/Dashboard/VitalsChart";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { fetchAllAnimalData, fetchAnimalPregnancyStats, AnimalWithData, PregnancyStat } from "@/lib/api";
+import { AnimalWithData, fetchAllAnimalData, fetchAnimalPregnancyStats, PregnancyStat } from "@/lib/api";
 import { Baby, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const Dashboard = () => {
   const [selectedAnimal, setSelectedAnimal] = useState("A12348"); // Default to Bella (has pregnancy stats)

@@ -1,4 +1,3 @@
-
 // ROI calculation parameters
 export interface ROIParameters {
   herdSize: number;
@@ -26,24 +25,27 @@ export interface ROIResults {
   roi: number; // Return on Investment (percentage)
 }
 
-// Default/initial values for ROI calculator
+// USD to INR conversion rate
+const USD_TO_INR = 86;
+
+// Default/initial values for ROI calculator (converted to INR)
 export const defaultROIParameters: ROIParameters = {
   herdSize: 100,
-  averageAnimalValue: 1200,
+  averageAnimalValue: 1200 * USD_TO_INR, // ₹103,200
   diseaseIncidenceRate: 15,
   mortalityRate: 3,
-  vetCostPerVisit: 120,
+  vetCostPerVisit: 120 * USD_TO_INR, // ₹10,320
   annualVetVisits: 12,
-  labTestCost: 75,
+  labTestCost: 75 * USD_TO_INR, // ₹6,450
   annualLabTests: 20,
-  laborCostPerHour: 18,
+  laborCostPerHour: 18 * USD_TO_INR, // ₹1,548
   dailyMonitoringHours: 2,
-  treatmentCostPerCase: 200
+  treatmentCostPerCase: 200 * USD_TO_INR // ₹17,200
 };
 
-// Constants for ROI calculation
-const SYSTEM_COST = 15000; // Fixed system cost
-const ANNUAL_SUBSCRIPTION = 2400; // Annual maintenance/subscription
+// Constants for ROI calculation (converted to INR)
+const SYSTEM_COST = 15000 * USD_TO_INR; // ₹1,290,000 - Fixed system cost
+const ANNUAL_SUBSCRIPTION = 2400 * USD_TO_INR; // ₹206,400 - Annual maintenance/subscription
 const DISEASE_REDUCTION_FACTOR = 0.4; // 40% reduction in disease with the system
 const MORTALITY_REDUCTION_FACTOR = 0.5; // 50% reduction in mortality with the system
 const VET_VISIT_REDUCTION_FACTOR = 0.3; // 30% reduction in vet visits
