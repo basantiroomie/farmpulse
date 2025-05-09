@@ -1,21 +1,6 @@
-// Use a different approach to set the API base URL that works in various environments
-const getApiBaseUrl = () => {
-  // Use window.location to get the current protocol and hostname
-  const { protocol, hostname } = window.location;
-  
-  // For development environments, use the specific port
-  // Check if we're running on localhost or a development environment
-  if (hostname === 'localhost' || hostname.includes('lovableproject.com')) {
-    return `${protocol}//${hostname}:3001/api`;
-  }
-  
-  // For production environment (adjust as needed)
-  return `${protocol}//${hostname}/api`;
-};
+import { healthRanges } from "./sampleData";
 
-const API_BASE_URL = getApiBaseUrl();
-
-// Type definitions
+// Type Definitions
 export interface Animal {
   id: string;
   name: string;
@@ -29,15 +14,16 @@ export interface HealthData {
   id: number;
   animal_id: string;
   date: string;
-  heart_rate: number;
   temperature: number;
+  heart_rate: number;
   activity: number;
+  status?: "normal" | "warning" | "critical";
+  notes?: string;
 }
 
 export interface PregnancyData {
-  id?: number;
   animal_id: string;
-  status: string;
+  status: "Unknown" | "Confirmed" | "Not Pregnant";
   gestation_days: number;
   expected_due_date: string;
   last_checkup: string;
@@ -53,203 +39,258 @@ export interface PregnancyStat {
   heart_rate: number;
   fetal_heart_rate: number;
   activity: number;
-  notes: string;
+  notes?: string;
 }
 
 export interface AnimalWithData {
   animal: Animal;
   healthData: HealthData[];
-  pregnancyData: PregnancyData;
-  pregnancyStats?: PregnancyStat[];
+  pregnancyData?: PregnancyData;
 }
 
-// Fallback data to use when API fails
-const fallbackAnimals = [
-  { id: "A12345", name: "Daisy", breed: "Holstein", dob: "2022-03-15", gender: "Female", created_at: "" },
-  { id: "A12346", name: "Bella", breed: "Jersey", dob: "2021-07-22", gender: "Female", created_at: "" },
-  { id: "A12347", name: "Max", breed: "Angus", dob: "2022-01-10", gender: "Male", created_at: "" },
-  { id: "A12348", name: "Rosie", breed: "Hereford", dob: "2023-02-05", gender: "Female", created_at: "" },
-  { id: "A12349", name: "Duke", breed: "Brahman", dob: "2022-09-18", gender: "Male", created_at: "" }
+// Mock database - normally this would come from a backend
+const ANIMALS: Animal[] = [
+  { id: "A12345", name: "Daisy", breed: "Holstein", dob: "2022-03-15", gender: "Female", created_at: "2022-04-10" },
+  { id: "A12346", name: "Bella", breed: "Jersey", dob: "2021-07-22", gender: "Female", created_at: "2021-08-01" },
+  { id: "A12347", name: "Max", breed: "Angus", dob: "2023-01-10", gender: "Male", created_at: "2023-02-05" },
+  { id: "A12348", name: "Lucy", breed: "Hereford", dob: "2021-11-05", gender: "Female", created_at: "2021-12-01" }
 ];
 
-// Fallback health data
-const getDefaultHealthData = (animalId: string): HealthData[] => [
-  {
-    id: 1,
-    animal_id: animalId,
-    date: new Date().toISOString().split('T')[0],
-    heart_rate: 75,
-    temperature: 38.5,
-    activity: 7
-  }
-];
-
-// Fallback pregnancy data
-const getDefaultPregnancyData = (animalId: string): PregnancyData => ({
-  animal_id: animalId,
-  status: "Unknown",
-  gestation_days: 0,
-  expected_due_date: "",
-  last_checkup: "",
-  fetal_heart_rate: 0,
-  notes: ""
-});
-
-// Fallback pregnancy stats data
-const getDefaultPregnancyStats = (animalId: string): PregnancyStat[] => {
-  const stats: PregnancyStat[] = [];
-  const today = new Date();
+const createHealthData = (animalId: string, days: number = 7): HealthData[] => {
+  const data: HealthData[] = [];
+  const endDate = new Date();
   
-  for (let i = 0; i < 7; i++) {
+  const isPregnant = animalId === "A12346" || animalId === "A12348";
+  
+  for (let i = 0; i < days; i++) {
     const date = new Date();
-    date.setDate(today.getDate() - (6 - i));
+    date.setDate(endDate.getDate() - (days - i - 1));
     
-    stats.push({
+    // Generate data based on animal ID to create different patterns
+    let temperature = 38.5; // Normal baseline
+    let heartRate = 70; // Normal baseline
+    let activity = 7; // Normal baseline
+    
+    // Create some variation based on animal ID
+    switch(animalId) {
+      case "A12345": // Daisy: normal, healthy
+        temperature += Math.random() * 0.4;
+        heartRate += Math.floor(Math.random() * 10);
+        activity += Math.random() * 1.5;
+        break;
+      case "A12346": // Bella: pregnant, slightly elevated temperature
+        temperature += Math.random() * 0.7 + 0.6;
+        heartRate += Math.floor(Math.random() * 15 + 5);
+        activity -= Math.random() * 2;
+        break;
+      case "A12347": // Max: high activity
+        temperature += Math.random() * 0.3;
+        heartRate += Math.floor(Math.random() * 8);
+        activity += Math.random() * 2 + 1;
+        break;
+      case "A12348": // Lucy: pregnant, critical condition on last day
+        if (i === days - 1) {
+          temperature += Math.random() * 0.3 + 1.8; // Critical temperature
+          heartRate += Math.floor(Math.random() * 5 + 20); // Critical heart rate
+          activity -= Math.random() * 4 + 2; // Critical low activity
+        } else {
+          temperature += Math.random() * 0.7 + 0.3;
+          heartRate += Math.floor(Math.random() * 12 + 3);
+          activity -= Math.random() * 1.5;
+        }
+        break;
+    }
+    
+    // Round and constrain values
+    temperature = parseFloat(temperature.toFixed(1));
+    heartRate = Math.max(60, Math.min(100, Math.floor(heartRate)));
+    activity = parseFloat(Math.max(2, Math.min(10, activity)).toFixed(1));
+    
+    // Add some trends based on day index
+    if (i > days - 3 && animalId === "A12346") {
+      // Bella trending worse in last 2 days (except last day gets better)
+      if (i === days - 2) {
+        temperature += 0.7;
+        heartRate += 8;
+        activity -= 2;
+      } else if (i === days - 1) {
+        temperature -= 0.5;
+        heartRate -= 5;
+        activity += 1;
+      }
+    }
+    
+    // Determine status
+    let status: "normal" | "warning" | "critical" = "normal";
+    if (
+      temperature > healthRanges.temperature.warning.max ||
+      heartRate > healthRanges.heartRate.warning.max ||
+      activity < healthRanges.activity.warning.min
+    ) {
+      status = "critical";
+    } else if (
+      temperature > healthRanges.temperature.normal.max ||
+      heartRate > healthRanges.heartRate.normal.max ||
+      activity < healthRanges.activity.normal.min
+    ) {
+      status = "warning";
+    }
+    
+    // Create health entry
+    data.push({
       id: i + 1,
       animal_id: animalId,
       date: date.toISOString().split('T')[0],
-      temperature: 38.5,
-      heart_rate: 75,
-      fetal_heart_rate: 170,
-      activity: 8,
-      notes: "Fallback data"
+      temperature,
+      heart_rate: heartRate,
+      activity,
+      status,
+      notes: i === days - 1 && status === "critical" ? "Follow-up examination recommended" : undefined
     });
   }
   
-  return stats;
+  return data;
 };
 
-// API functions with improved error handling
-export const fetchAllAnimals = async (): Promise<Animal[]> => {
-  try {
-    console.log(`Fetching animals from: ${API_BASE_URL}/animals`);
-    const response = await fetch(`${API_BASE_URL}/animals`, {
-      // Add a timeout to prevent long hanging requests
-      signal: AbortSignal.timeout(5000)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Error fetching animals: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    // Ensure we always return an array, even if data is unexpected
-    return data && data.success && Array.isArray(data.data) ? data.data : fallbackAnimals;
-  } catch (error) {
-    console.error('Error fetching animals:', error);
-    // Return fallback data when API fails
-    return fallbackAnimals;
+const createPregnancyData = (animalId: string): PregnancyData | undefined => {
+  if (animalId === "A12346") {
+    // Bella: Normal pregnancy
+    return {
+      animal_id: animalId,
+      status: "Confirmed",
+      gestation_days: 87,
+      expected_due_date: "2025-08-15",
+      last_checkup: "2025-05-01",
+      fetal_heart_rate: 180,
+      notes: "Progressing normally"
+    };
+  } else if (animalId === "A12348") {
+    // Lucy: Problematic pregnancy
+    return {
+      animal_id: animalId,
+      status: "Confirmed",
+      gestation_days: 112,
+      expected_due_date: "2025-07-05",
+      last_checkup: "2025-05-04",
+      fetal_heart_rate: 210, // Concerning high rate
+      notes: "Fetal heart rate elevated, monitor closely"
+    };
   }
+  
+  return undefined;
 };
 
-export const fetchAnimalById = async (animalId: string): Promise<Animal | null> => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/animals/${animalId}`, {
-      signal: AbortSignal.timeout(3000)
-    });
+const createPregnancyStats = (animalId: string, days: number = 14): PregnancyStat[] => {
+  if (animalId !== "A12346" && animalId !== "A12348") return [];
+  
+  const data: PregnancyStat[] = [];
+  const endDate = new Date();
+  const isLucy = animalId === "A12348"; // Lucy has issues
+  
+  for (let i = 0; i < days; i++) {
+    const date = new Date();
+    date.setDate(endDate.getDate() - (days - i - 1));
     
-    if (!response.ok) {
-      throw new Error(`Error fetching animal ${animalId}: ${response.statusText}`);
+    // Base values
+    let fetalHeartRate = isLucy ? 190 : 175;
+    let temperature = isLucy ? 39.2 : 38.7;
+    let heartRate = isLucy ? 75 : 72;
+    let activity = isLucy ? 5.5 : 6.5;
+    
+    // Add some variation
+    fetalHeartRate += Math.floor(Math.random() * 20 - 10);
+    temperature += (Math.random() * 0.6 - 0.3);
+    heartRate += Math.floor(Math.random() * 10 - 5);
+    activity += (Math.random() * 1 - 0.5);
+    
+    // Lucy's concerning trend in last days
+    if (isLucy && i > days - 4) {
+      fetalHeartRate += Math.floor((i - (days - 4)) * 8); // Increasing trend
+      temperature += (i - (days - 4)) * 0.2;
+      activity -= (i - (days - 4)) * 0.5;
     }
     
-    const data = await response.json();
-    return data.success ? data.data : null;
-  } catch (error) {
-    console.error(`Error fetching animal ${animalId}:`, error);
-    // Find a fallback animal with the matching ID or return the first one
-    return fallbackAnimals.find(a => a.id === animalId) || fallbackAnimals[0] || null;
+    // Round values
+    temperature = parseFloat(temperature.toFixed(1));
+    fetalHeartRate = Math.max(160, Math.min(220, Math.floor(fetalHeartRate)));
+    heartRate = Math.max(60, Math.min(90, Math.floor(heartRate)));
+    activity = parseFloat(Math.max(3, Math.min(8, activity)).toFixed(1));
+    
+    // Notes for concerning values
+    let notes;
+    if (fetalHeartRate > 200) {
+      notes = "Fetal tachycardia observed - consult veterinarian";
+    } else if (temperature > 39.5) {
+      notes = "Elevated temperature - monitor closely";
+    } else if (activity < 4) {
+      notes = "Decreased activity - possible discomfort";
+    }
+    
+    data.push({
+      id: i + 1,
+      animal_id: animalId,
+      date: date.toISOString().split('T')[0],
+      temperature,
+      heart_rate: heartRate,
+      fetal_heart_rate: fetalHeartRate,
+      activity,
+      notes
+    });
   }
+  
+  return data;
+};
+
+// API Functions
+export const fetchAnimals = async (): Promise<Animal[]> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  return ANIMALS;
+};
+
+export const fetchAnimalData = async (animalId: string): Promise<Animal | null> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 200));
+  return ANIMALS.find(animal => animal.id === animalId) || null;
 };
 
 export const fetchAnimalHealthData = async (animalId: string): Promise<HealthData[]> => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/animals/${animalId}/health`, {
-      signal: AbortSignal.timeout(3000)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Error fetching health data for animal ${animalId}: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    return data.success && Array.isArray(data.data) ? data.data : getDefaultHealthData(animalId);
-  } catch (error) {
-    console.error(`Error fetching health data for animal ${animalId}:`, error);
-    return getDefaultHealthData(animalId);
-  }
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return createHealthData(animalId);
 };
 
 export const fetchAnimalPregnancyData = async (animalId: string): Promise<PregnancyData | null> => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/animals/${animalId}/pregnancy`, {
-      signal: AbortSignal.timeout(3000)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Error fetching pregnancy data for animal ${animalId}: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    return data.success ? data.data : getDefaultPregnancyData(animalId);
-  } catch (error) {
-    console.error(`Error fetching pregnancy data for animal ${animalId}:`, error);
-    return getDefaultPregnancyData(animalId);
-  }
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  const data = createPregnancyData(animalId);
+  return data || null;
 };
 
 export const fetchAnimalPregnancyStats = async (animalId: string): Promise<PregnancyStat[]> => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/animals/${animalId}/pregnancy-stats`, {
-      signal: AbortSignal.timeout(5000)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Error fetching pregnancy stats for animal ${animalId}: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    return data.success && Array.isArray(data.data) ? data.data : getDefaultPregnancyStats(animalId);
-  } catch (error) {
-    console.error(`Error fetching pregnancy stats for animal ${animalId}:`, error);
-    return getDefaultPregnancyStats(animalId);
-  }
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 400));
+  return createPregnancyStats(animalId);
 };
 
 export const fetchAllAnimalData = async (animalId: string): Promise<AnimalWithData | null> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/animals/${animalId}/all-data`, {
-      signal: AbortSignal.timeout(3000)
-    });
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 600));
     
-    if (!response.ok) {
-      throw new Error(`Error fetching data for animal ${animalId}: ${response.statusText}`);
-    }
+    const animal = ANIMALS.find(a => a.id === animalId);
+    if (!animal) return null;
     
-    const data = await response.json();
-    if (data.success) {
-      return data.data;
-    }
-    
-    // If API call succeeds but returns no data, build fallback data
-    throw new Error('API returned no data');
-  } catch (error) {
-    console.error(`Error fetching data for animal ${animalId}:`, error);
-    
-    // Create complete fallback data
-    const animal = await fetchAnimalById(animalId) || fallbackAnimals.find(a => a.id === animalId) || {
-      id: animalId,
-      name: "Unknown Animal",
-      breed: "Unknown",
-      dob: new Date().toISOString().split('T')[0],
-      gender: "Unknown",
-      created_at: new Date().toISOString()
-    };
+    const healthData = createHealthData(animalId);
+    const pregnancyData = createPregnancyData(animalId);
     
     return {
       animal,
-      healthData: getDefaultHealthData(animalId),
-      pregnancyData: getDefaultPregnancyData(animalId),
-      pregnancyStats: getDefaultPregnancyStats(animalId)
+      healthData,
+      pregnancyData
     };
+  } catch (error) {
+    console.error("Error fetching all animal data:", error);
+    return null;
   }
 };

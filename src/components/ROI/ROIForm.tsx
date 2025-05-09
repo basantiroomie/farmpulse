@@ -1,12 +1,11 @@
-
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { calculateROI, defaultROIParameters, ROIParameters, ROIResults } from "@/lib/roiCalculator";
 import { useToast } from "@/hooks/use-toast";
+import { calculateROI, defaultROIParameters, ROIParameters, ROIResults } from "@/lib/roiCalculator";
+import { useState } from "react";
 
 const ROIForm = () => {
   const [parameters, setParameters] = useState<ROIParameters>(defaultROIParameters);
@@ -52,9 +51,9 @@ const ROIForm = () => {
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
       maximumFractionDigits: 0,
     }).format(value);
   };
@@ -84,7 +83,7 @@ const ROIForm = () => {
               </div>
               
               <div>
-                <Label htmlFor="averageAnimalValue">Average Animal Value ($)</Label>
+                <Label htmlFor="averageAnimalValue">Average Animal Value (₹)</Label>
                 <Input
                   id="averageAnimalValue"
                   name="averageAnimalValue"
@@ -126,7 +125,7 @@ const ROIForm = () => {
               </div>
               
               <div>
-                <Label htmlFor="vetCostPerVisit">Veterinary Cost Per Visit ($)</Label>
+                <Label htmlFor="vetCostPerVisit">Veterinary Cost Per Visit (₹)</Label>
                 <Input
                   id="vetCostPerVisit"
                   name="vetCostPerVisit"
@@ -150,7 +149,7 @@ const ROIForm = () => {
               </div>
               
               <div>
-                <Label htmlFor="laborCostPerHour">Labor Cost Per Hour ($)</Label>
+                <Label htmlFor="laborCostPerHour">Labor Cost Per Hour (₹)</Label>
                 <Input
                   id="laborCostPerHour"
                   name="laborCostPerHour"

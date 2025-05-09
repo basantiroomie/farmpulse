@@ -1,97 +1,78 @@
-
-// Health ranges for animal health metrics
 export const healthRanges = {
-  heartRate: {
-    normal: { min: 60, max: 80 },
-    warning: { min: 80, max: 90 },
-    // Above 90 is considered critical
-  },
   temperature: {
     normal: { min: 38.0, max: 39.0 },
-    warning: { min: 39.0, max: 40.0 },
-    // Above 40.0 is considered critical
+    warning: { min: 39.1, max: 40.0 }
+  },
+  heartRate: {
+    normal: { min: 60, max: 80 },
+    warning: { min: 81, max: 90 }
   },
   activity: {
     normal: { min: 7, max: 10 },
-    warning: { min: 4, max: 7 },
-    // Below 4 is considered critical
+    warning: { min: 4, max: 6.9 }
   },
   pregnancy: {
     fetalHeartRate: {
-      normal: { min: 170, max: 190 },
-      warning: { min: 160, max: 200 },
-      // Below 160 or above 200 is considered critical
+      normal: { min: 160, max: 200 },
+      warning: { min: 150, max: 210 }
     }
   }
 };
 
-// Helper function to get status based on value and ranges
-export const getHealthStatus = (value: number, metricType: keyof typeof healthRanges) => {
-  if (metricType === 'heartRate') {
-    const ranges = healthRanges.heartRate;
-    if (value <= ranges.normal.max) return 'normal';
-    if (value <= ranges.warning.max) return 'warning';
-    return 'critical';
-  }
+// Determine health status based on value and metric type
+export const getHealthStatus = (
+  value: number, 
+  metricType: "heartRate" | "temperature" | "activity"
+): "normal" | "warning" | "critical" => {
+  if (!value && value !== 0) return "normal";
   
-  if (metricType === 'temperature') {
-    const ranges = healthRanges.temperature;
-    if (value <= ranges.normal.max) return 'normal';
-    if (value <= ranges.warning.max) return 'warning';
-    return 'critical';
+  switch (metricType) {
+    case "temperature":
+      if (value > healthRanges.temperature.warning.max) return "critical";
+      if (value > healthRanges.temperature.normal.max) return "warning";
+      return "normal";
+    
+    case "heartRate":
+      if (value > healthRanges.heartRate.warning.max) return "critical";
+      if (value > healthRanges.heartRate.normal.max) return "warning";
+      return "normal";
+    
+    case "activity":
+      if (value < healthRanges.activity.warning.min) return "critical";
+      if (value < healthRanges.activity.normal.min) return "warning";
+      return "normal";
+      
+    default:
+      return "normal";
   }
-  
-  if (metricType === 'activity') {
-    const ranges = healthRanges.activity;
-    if (value >= ranges.normal.min) return 'normal';
-    if (value >= ranges.warning.min) return 'warning';
-    return 'critical';
-  }
-  
-  if (metricType === 'pregnancy') {
-    // Handle the nested structure for pregnancy data
-    const fetalRanges = healthRanges.pregnancy.fetalHeartRate;
-    if (value >= fetalRanges.normal.min && value <= fetalRanges.normal.max) return 'normal';
-    if (value >= fetalRanges.warning.min && value <= fetalRanges.warning.max) return 'warning';
-    return 'critical';
-  }
-  
-  return 'normal';
 };
 
-// Labels for the chart
-export const dayLabels = ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
+// Generate color for health status
+export const getStatusColor = (
+  status: "normal" | "warning" | "critical"
+): string => {
+  switch (status) {
+    case "normal":
+      return "text-success";
+    case "warning":
+      return "text-warning";
+    case "critical":
+      return "text-danger";
+    default:
+      return "text-muted-foreground";
+  }
+};
 
-// Metrics information
-export const metricsInfo = {
-  heartRate: {
-    title: 'Heart Rate',
-    unit: 'bpm',
-    description: 'Beats per minute',
-    icon: 'heart'
-  },
-  temperature: {
-    title: 'Temperature',
-    unit: '°C',
-    description: 'Body temperature',
-    icon: 'thermometer'
-  },
-  activity: {
-    title: 'Activity',
-    unit: 'score',
-    description: 'Movement level (0-10)',
-    icon: 'activity'
-  },
-  pregnancy: {
-    title: 'Pregnancy Status',
-    unit: 'days',
-    description: 'Gestation progress and health',
-    icon: 'baby'
-  },
-  fetalHeartRate: {
-    title: 'Fetal Heart Rate',
-    unit: 'bpm',
-    description: 'Fetal heart beats per minute',
-    icon: 'heart-pulse'
+// Utility to format dates consistently
+export const formatDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch (e) {
+    return dateString;
   }
 };
