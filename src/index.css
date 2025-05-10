@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 60 100% 97%;    /* #FBFFF1 */
+    --foreground: 120 5% 7%;      /* #12130F */
+
+    --card: 60 100% 97%;
+    --card-foreground: 120 5% 7%;
+
+    --popover: 60 100% 97%;
+    --popover-foreground: 120 5% 7%;
+
+    --primary: 166 88% 27%;         /* #F49E4C */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 166 88% 27%;       /* #F49E4C */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 60 20% 90%;
+    --muted-foreground: 120 5% 40%;
+
+    --accent: 166 88% 27%;          /* #F49E4C */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 27 15% 85%;
+    --input: 27 15% 85%;
+    --ring: 166 88% 27%;           /* #F49E4C */
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 225 4% 6%;      /* #12130F */
+    --foreground: 0 0% 100%;      /* Pure white for better contrast */
+
+    --card: 225 4% 6%;           /* #12130F */
+    --card-foreground: 0 0% 100%;
+
+    --popover: 225 4% 6%;        /* #12130F */
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 166 88% 27%;        /* #F49E4C */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 166 88% 27%;      /* #F49E4C */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 225 4% 12%;
+    --muted-foreground: 0 0% 80%;
+
+    --accent: 166 88% 27%;         /* #F49E4C */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 225 4% 16%;
+    --input: 225 4% 16%;
+    --ring: 166 88% 27%;           /* #F49E4C */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.glass-card {
+  @apply bg-white/60 dark:bg-[#12130F]/80 backdrop-blur-lg border border-white/20 dark:border-[#F49E4C]/20 shadow-lg;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
