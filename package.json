@@ -13,7 +13,8 @@
     "setup": "node setup-iot.js",
     "start": "concurrently \"npm run backend\" \"npm run dev\"",
     "simulate": "node src/backend/tools/simulateData.js",
-    "simulate:enhanced": "node src/backend/tools/enhancedSimulateData.js"
+    "simulate:enhanced": "node src/backend/tools/enhancedSimulateData.js",
+    "test:ws": "node src/backend/tools/debug/wsTest.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

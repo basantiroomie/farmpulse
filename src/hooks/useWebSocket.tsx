@@ -43,7 +43,7 @@ export default function useWebSocket({
       wsRef.current = new WebSocket(url);
       
       wsRef.current.onopen = () => {
-        console.log("WebSocket connection established");
+        console.log(`WebSocket connection established to ${url}`);
         setConnected(true);
         setConnectionError(null);
         reconnectAttemptsRef.current = 0;
@@ -64,8 +64,8 @@ export default function useWebSocket({
       };
       
       wsRef.current.onerror = (error) => {
-        console.error("WebSocket error:", error);
-        setConnectionError("Connection error");
+        console.error(`WebSocket error with ${url}:`, error);
+        setConnectionError(`Connection error to ${url.split('?')[0]}`);
       };
       
       wsRef.current.onclose = (event) => {

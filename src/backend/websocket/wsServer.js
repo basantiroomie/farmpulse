@@ -19,14 +19,23 @@ const simulations = new Map();
 export function initWebSocketServer(server) {
   const wss = new WebSocketServer({ server });
   
-  console.log('WebSocket server initialized');
+  console.log('WebSocket server initialized on port', server.address()?.port || 'unknown');
+  
+  // Log details about the server
+  console.log(`WebSocket path: ws://localhost:${server.address()?.port || '3001'}`);
   
   wss.on('connection', async (ws, req) => {
+    // Log connection details
+    console.log(`WebSocket connection received from ${req.socket.remoteAddress}`);
+    console.log(`Connection URL: ${req.url}`);
+    
     // Extract query parameters
     const url = new URL(req.url, 'http://localhost');
     const deviceId = url.searchParams.get('deviceId');
     const apiKey = url.searchParams.get('apiKey');
     const clientType = url.searchParams.get('type') || 'device';
+    
+    console.log(`Client type: ${clientType}, Device ID: ${deviceId || 'N/A'}`);
     
     // Dashboard clients don't require authentication
     if (clientType === 'dashboard') {

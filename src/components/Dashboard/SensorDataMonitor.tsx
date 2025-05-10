@@ -14,8 +14,12 @@ const SensorDataMonitor = ({ animalId }: SensorDataMonitorProps) => {
   const [simulating, setSimulating] = useState<boolean>(false);
   const { toast } = useToast();
   
-  // WebSocket setup - change the URL to match your WebSocket server
-  const wsUrl = `ws://${window.location.hostname}:3001?type=dashboard&animalId=${animalId}`;
+  // WebSocket setup - direct connection to backend server
+  const wsUrl = `ws://localhost:3001?type=dashboard&animalId=${animalId}`;
+  
+  useEffect(() => {
+    console.log(`Attempting to connect to WebSocket at: ${wsUrl}`);
+  }, [wsUrl]);
   
   const { connected, sendMessage, lastMessage, connectionError, reconnect } = useWebSocket({
     url: wsUrl,
@@ -70,9 +74,23 @@ const SensorDataMonitor = ({ animalId }: SensorDataMonitorProps) => {
       sendMessage({
         type: 'getSimulationStatus'
       });
+      
+      // Show connection success toast
+      toast({
+        title: "WebSocket Connected",
+        description: "Successfully connected to real-time data stream",
+        variant: "default",
+      });
+    } else if (connectionError) {
+      // Show connection error toast
+      toast({
+        title: "WebSocket Connection Failed",
+        description: connectionError || "Could not connect to data stream",
+        variant: "destructive",
+      });
     }
-  }, [connected, sendMessage]);
-  
+  }, [connected, connectionError, sendMessage, toast]);
+
   // Find latest temperature, heart rate, etc. from the readings
   const extractLatestReadings = () => {
     if (!liveData?.readings || !Array.isArray(liveData.readings)) {
@@ -165,8 +183,12 @@ const SensorDataMonitor = ({ animalId }: SensorDataMonitorProps) => {
               <CheckCircle size={14} /> Connected
             </Badge>
           ) : (
-            <Badge variant="outline" className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 flex items-center gap-1">
-              <AlertCircle size={14} /> {connectionError || 'Disconnected'}
+            <Badge 
+              variant="outline" 
+              className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 flex items-center gap-1 cursor-pointer hover:bg-red-200 dark:hover:bg-red-800"
+              onClick={reconnect}
+            >
+              <AlertCircle size={14} /> {connectionError || 'Disconnected'} (Click to reconnect)
             </Badge>
           )}
           

@@ -2,47 +2,98 @@
 
 ![FarmPulse Logo](./src/assets/farmpulse-logo.svg)
 
-FarmPulse is an advanced IoT-based cattle health monitoring system that enables real-time tracking of vital health metrics, early detection of health issues, and specialized monitoring for pregnant cattle. The system uses wearable IoT sensors to collect data, with a central dashboard providing real-time visualization and alerts.
+FarmPulse is an advanced IoT-based cattle health monitoring system that enables real-time tracking of vital health metrics, early detection of health issues, and specialized monitoring for pregnant cattle. The system uses wearable IoT sensors and ESP32 devices to collect data, with a central dashboard providing real-time visualization and alerts.
 
 ## Table of Contents
+- [System Overview](#system-overview)
+- [Key Features](#key-features)
+- [Technology Stack](#technology-stack)
 - [System Architecture](#system-architecture)
-- [Features](#features)
-- [Health Metrics](#health-metrics)
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
-  - [Backend Setup](#backend-setup)
-  - [Frontend Setup](#frontend-setup)
-  - [Database Setup](#database-setup)
-- [Usage](#usage)
+  - [Environment Setup](#environment-setup)
+  - [Installation Steps](#installation-steps)
+- [Usage Guide](#usage-guide)
   - [Dashboard](#dashboard)
-  - [Cattle Management](#cattle-management)
-  - [Alert Systems](#alert-systems)
-  - [Reports](#reports)
-- [ESP32 Simulation](#esp32-simulation)
-  - [Basic Usage](#basic-usage)
-  - [Simulation Scenarios](#simulation-scenarios)
-  - [Custom Configurations](#custom-configurations)
-  - [Data Logging](#data-logging)
-- [API Reference](#api-reference)
-- [Dependencies](#dependencies)
+  - [Real-time Monitoring](#real-time-monitoring)
+  - [Simulation Tools](#simulation-tools)
+- [WebSocket Connection](#websocket-connection)
+- [ESP32 Integration](#esp32-integration)
+  - [Hardware Setup](#hardware-setup)
+  - [Device Registration](#device-registration)
+- [Anomaly Detection](#anomaly-detection)
+- [Troubleshooting](#troubleshooting)
+  - [Common Issues](#common-issues)
+- [Development](#development)
+  - [Project Structure](#project-structure)
+  - [Available Scripts](#available-scripts)
 - [License](#license)
+
+## System Overview
+
+FarmPulse revolutionizes cattle health monitoring by providing:
+
+- **Real-time health tracking**: Monitor temperature, heart rate, activity levels, and other vital parameters
+- **Pregnancy monitoring**: Special features for monitoring pregnant cattle including fetal heart rate
+- **Anomaly detection**: AI-powered early warning system for health issues
+- **WebSocket communication**: Real-time data flow from sensors to dashboard
+- **Simulation capabilities**: Test the system without physical sensors
+
+The system consists of:
+1. **ESP32 sensors** (or simulator): Collect and transmit animal health data
+2. **Backend server**: Process incoming sensor data and manage WebSocket connections
+3. **Frontend dashboard**: Real-time visualization of health metrics and alerts
+4. **Database systems**: Store and retrieve historical data
+
+## Key Features
+
+- **Live Sensor Data Display**: Real-time visualization of temperature, heart rate, activity level, and more
+- **Anomaly Detection**: AI-powered analysis to flag potential health issues
+- **Pregnancy Monitoring**: Special tracking for pregnant cattle, including fetal heart rate
+- **Simulation Tools**: Built-in data simulation for testing and demonstration
+- **WebSocket Communication**: Persistent connections for instant data updates
+- **Multi-animal Support**: Monitor multiple animals simultaneously
+- **Responsive Design**: Works on desktop and mobile devices
+
+## Technology Stack
+
+### Frontend
+- **React**: UI framework
+- **Vite**: Build tool and development server
+- **TypeScript**: Type-safe JavaScript
+- **ShadCN/UI**: UI component library
+- **Lucide React**: Icons
+- **Tailwind CSS**: Utility-first CSS framework
+
+### Backend
+- **Node.js**: Runtime environment
+- **Express**: Web server framework
+- **WebSocket**: Real-time communication
+- **SQLite/MongoDB**: Data storage (configurable)
+- **InfluxDB**: Time-series data storage
+
+### IoT/Hardware
+- **ESP32**: Microcontroller for sensor data collection
+- **DHT11**: Temperature and humidity sensor
+- **MPU6050**: Accelerometer for activity monitoring
+- **Simulation tools**: Software for testing without physical hardware
 
 ## System Architecture
 
-FarmPulse is built using a modern tech stack with a focus on real-time data processing and visualization:
+FarmPulse employs a modern, real-time architecture:
 
 ```
 ┌─────────────┐      ┌──────────────┐      ┌────────────────┐
 │ ESP32 IoT   │      │              │      │                │
 │ Sensors     │◄────►│  WebSocket   │◄────►│  Web Frontend  │
-│             │      │  Server      │      │  (React/Vite)  │
+│ (or Sim)    │      │  Server      │      │  (React/Vite)  │
 └─────────────┘      │              │      │                │
                      └──────┬───────┘      └────────────────┘
                             │
                      ┌──────▼───────┐      ┌────────────────┐
                      │              │      │                │
-                     │  Express.js  │◄────►│  MongoDB       │
-                     │  Backend     │      │  (Device Reg.) │
+                     │  Express.js  │◄────►│  MongoDB/      │
+                     │  Backend     │      │  SQLite        │
                      │              │      │                │
                      └──────┬───────┘      └────────────────┘
                             │
@@ -50,254 +101,242 @@ FarmPulse is built using a modern tech stack with a focus on real-time data proc
                      │              │      │                │
                      │  Anomaly     │◄────►│  InfluxDB      │
                      │  Detection   │      │  (Time Series) │
-                     │              │      │                │
-                     └──────────────┘      └────────────────┘
 ```
-
-- **ESP32 IoT Sensors**: Wearable devices attached to cattle to collect health metrics
-- **WebSocket Server**: Provides real-time bidirectional communication between sensors and frontend
-- **Express.js Backend**: RESTful API for data access and management
-- **MongoDB**: Stores device registration, animal records, and user data
-- **InfluxDB**: Time-series database for storing sensor readings
-- **Anomaly Detection**: Machine learning algorithms to identify potential health issues
-- **Web Frontend**: React application with real-time dashboard for monitoring cattle health
-
-## Features
-
-- **Real-time Health Monitoring**: Track temperature, heart rate, activity levels, and more in real-time
-- **Fetal Monitoring**: Specialized tracking for pregnant cattle with fetal heart rate monitoring
-- **Anomaly Detection**: AI-powered analysis to identify potential health issues before they become critical
-- **Mobile-Friendly Dashboard**: Access data from anywhere on any device
-- **Alert System**: Receive notifications for anomalies or concerning health trends
-- **Historical Data Analysis**: View trends and patterns in health metrics over time
-- **Herd Management**: Track entire herds and individual animals with detailed profiles
-- **ROI Calculator**: Estimate cost savings from implementing the FarmPulse system
-
-## Health Metrics
-
-FarmPulse monitors the following key health metrics:
-
-| Metric             | Normal Range       | Warning Range      | Critical Range    |
-|--------------------|--------------------|--------------------|--------------------|
-| Temperature        | 38.0°C - 39.0°C    | 39.1°C - 40.0°C    | >40.0°C or <38.0°C |
-| Heart Rate         | 60 - 80 bpm        | 81 - 90 bpm        | >90 bpm or <60 bpm |
-| Activity Level     | 7 - 10 (scale)     | 4 - 6.9 (scale)    | <4 (scale)         |
-| Fetal Heart Rate*  | 160 - 200 bpm      | 150 - 160 bpm      | >200 bpm or <150 bpm |
-
-*For pregnant cattle only
 
 ## Installation
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- npm (v8 or higher)
-- MongoDB (v4.4 or higher)
-- InfluxDB (v2.0 or higher)
+- **Node.js** (v16 or higher)
+- **npm** (v7 or higher)
+- **Git**
+- **MongoDB** (optional, SQLite is used by default)
+- **InfluxDB** (optional for time-series data)
 
-### Backend Setup
+### Environment Setup
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/yourusername/farmpulse.git
    cd farmpulse
    ```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env` file in the project root with the following variables:
+2. Create a `.env` file in the root directory:
    ```
    PORT=3001
    MONGODB_URI=mongodb://localhost:27017/farmpulse
    INFLUXDB_URL=http://localhost:8086
-   INFLUXDB_TOKEN=your_influx_token
-   INFLUXDB_ORG=your_organization
-   INFLUXDB_BUCKET=farmpulse
-   DEVICE_API_KEY=your_default_device_key
+   INFLUXDB_TOKEN=my-super-secret-auth-token
+   INFLUXDB_ORG=farmpulse
+   INFLUXDB_BUCKET=iot_sensors
+   USE_SQLITE=true
    ```
 
-4. Start the backend server:
+   > **Note**: Setting `USE_SQLITE=true` allows the application to run without MongoDB.
+
+### Installation Steps
+
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+2. **Start the backend server**:
    ```bash
    npm run backend
    ```
+   Look for output confirming WebSocket initialization:
+   ```
+   WebSocket server initialized on port 3001
+   WebSocket path: ws://localhost:3001
+   ```
 
-### Frontend Setup
-
-1. In a new terminal, start the frontend development server:
+3. **Start the frontend development server** (in a new terminal):
    ```bash
    npm run dev
    ```
 
-2. Access the frontend at:
-   ```
-   http://localhost:5173
-   ```
+4. **Open your browser** and navigate to the URL shown in the terminal (usually http://localhost:8080)
 
-### Database Setup
-
-1. Start MongoDB:
-   ```bash
-   mongod --dbpath /path/to/data/directory
-   ```
-
-2. Start InfluxDB (according to your installation method)
-
-3. The application will automatically create required database structures at startup
-
-## Usage
+## Usage Guide
 
 ### Dashboard
 
-The main dashboard provides a comprehensive overview of your herd's health:
+1. Navigate to http://localhost:8080 in your web browser
+2. Select an animal from the dropdown menu (default samples: A12345, A12346, A12347)
+3. View real-time sensor data in the dashboard
 
-1. Navigate to `http://localhost:5173/dashboard` in your browser
-2. Select an animal from the dropdown menu to view detailed metrics
-3. Monitor real-time health data including temperature, heart rate, and activity level
-4. View alerts and notifications for any concerning health trends
+### Real-time Monitoring
 
-### Cattle Management
+The dashboard displays:
 
-Add and manage cattle in your herd:
+- **Temperature**: Current body temperature in Celsius
+- **Heart Rate**: Beats per minute (BPM)
+- **Activity Level**: Scale from 0-10 showing movement intensity
+- **Humidity**: Environmental humidity percentage
+- **Fetal Heart Rate**: For pregnant cattle
+- **Audio Level**: Environmental sound detection
 
-1. Navigate to `http://localhost:5173/admin`
-2. Click on "Animal Management" 
-3. Use the "Add Animal" button to register new cattle
-4. Fill in details including ID, name, breed, date of birth, and gender
+### Simulation Tools
 
-### Alert Systems
+FarmPulse includes a powerful simulator to test without physical hardware:
 
-Configure alerts for health anomalies:
-
-1. Navigate to `http://localhost:5173/admin`
-2. Click on "Alert Configuration"
-3. Set threshold values for temperature, heart rate, activity, and fetal heart rate
-4. Configure notification methods (dashboard, email, SMS)
-
-### Reports
-
-Generate and view reports on herd health:
-
-1. Navigate to `http://localhost:5173/admin`
-2. Click on "Reports"
-3. Select report type, date range, and animals to include
-4. Export reports in CSV or PDF format
-
-## ESP32 Simulation
-
-For testing without physical IoT devices, FarmPulse includes an ESP32 simulation tool.
-
-### Basic Usage
-
-1. Open a terminal and navigate to the project directory
-2. Run the simulator:
+1. **Start the simulator**:
    ```bash
-   npm run simulate
-   ```
-   or directly:
-   ```bash
-   node src/backend/tools/enhancedSimulateData.js
+   npm run simulate:enhanced
    ```
 
-3. From the main menu, select "Configure simulation" to set up your simulation parameters
-4. Select "Start simulation" to begin sending simulated sensor data
+2. **Configure simulation settings**:
+   - WebSocket URL: ws://localhost:3001
+   - Device ID: DEV-SIMULATOR (or any custom ID)
+   - API Key: (use default)
+   - Animal ID: CATTLE001 (or any ID in your system)
+   - Data interval: 5000 (5 seconds)
 
-### Simulation Scenarios
+3. **Select sensors to simulate**:
+   - DHT11 (temperature/humidity)
+   - MPU6050 (movement/activity)
+   - HEALTH (vital signs)
+   - PREGNANCY (fetal monitoring) - for pregnant cattle
 
-The simulator includes several pre-configured scenarios:
+4. **Choose simulation scenario**:
+   - Normal: Baseline healthy readings
+   - Fever: Elevated temperature
+   - Distress: Abnormal vital signs
+   - Low Activity: Reduced movement
+   - Custom: Define your own parameters
 
-- **Normal**: Simulates a healthy animal with normal vital signs
-- **Fever**: Simulates an animal with elevated temperature and heart rate
-- **Low Activity**: Simulates an animal with reduced movement/activity
-- **High Heart Rate**: Simulates an animal with an elevated heart rate
-- **Custom**: Configure your own custom values for all metrics
+## WebSocket Connection
 
-### Custom Configurations
+FarmPulse uses WebSockets for real-time data communication. The system is configured to use:
 
-Customize the simulation with the following options:
+- **Backend WebSocket Server**: ws://localhost:3001
+- **Client Connection**: Direct connection from frontend to backend
+- **Connection Types**:
+  - Dashboard clients: `?type=dashboard&animalId=ANIMAL_ID`
+  - Device/simulator clients: `?type=device&deviceId=DEVICE_ID&apiKey=API_KEY`
 
-- **Connection Settings**: Configure WebSocket URL, device ID, API key, and data interval
-- **Sensor Settings**: Select which sensors to simulate (temperature, activity, heart rate, etc.)
-- **Scenario Settings**: Choose from preset scenarios or configure custom values
-- **Output Settings**: Configure logging level and data export options
+### Testing WebSocket Connection
 
-### Data Logging
-
-The simulator can log data to JSON files for later analysis:
-
-1. From the main menu, select "Configure simulation" then "Output Settings"
-2. Enable "Save Data to File"
-3. Start the simulation
-4. Data will be saved in `src/backend/tools/logs/` directory
-
-## API Reference
-
-### WebSocket API
-
-The WebSocket server accepts connections at:
-```
-ws://localhost:3001
+Use the built-in WebSocket testing tool:
+```bash
+npm run test:ws
 ```
 
-Query parameters:
-- `type`: Client type (`dashboard` or `device` or `simulator`)
-- `deviceId`: ID of the connecting device (for device connections)
-- `apiKey`: API key for authentication (for device connections)
-- `animalId`: Animal ID to monitor (for dashboard connections)
+This tool helps diagnose connection issues between components.
 
-Message types:
-- `sensorData`: Contains sensor readings
-- `connection`: Connection status
-- `error`: Error message
-- `simulationStatus`: Simulation status
+## ESP32 Integration
 
-### REST API
+### Hardware Setup
 
-The backend provides the following REST endpoints:
+For physical ESP32 implementation:
 
-#### Animals
+1. **Required Components**:
+   - ESP32 development board
+   - DHT11 temperature sensor
+   - MPU6050 accelerometer
+   - Optional heart rate sensor
+   - Power supply (battery for wearable use)
 
-- `GET /api/animals`: Get all animals
-- `GET /api/animals/:id`: Get a specific animal
-- `POST /api/animals`: Create a new animal
-- `PUT /api/animals/:id`: Update an animal
-- `DELETE /api/animals/:id`: Delete an animal
+2. **ESP32 Firmware**:
+   - Use the Arduino framework
+   - Install required libraries (WiFi, WebSockets, DHT, etc.)
+   - Configure to connect to your WiFi network
+   - Set WebSocket URL to point to your server
+   - Flash the firmware to the ESP32
 
-#### Health Data
+### Device Registration
 
-- `GET /api/animals/:id/health`: Get health data for a specific animal
-- `GET /api/animals/:id/pregnancy`: Get pregnancy data for a specific animal
-- `GET /api/animals/:id/pregnancy-stats`: Get pregnancy statistics for a specific animal
-- `GET /api/animals/:id/all-data`: Get all data for a specific animal
+Each physical device needs to be registered:
 
-#### Devices
+1. Create a device in the system with a unique device ID
+2. Associate the device with a specific animal
+3. Generate an API key for authentication
+4. Configure the ESP32 with these credentials
 
-- `GET /api/devices`: Get all registered devices
-- `POST /api/devices`: Register a new device
-- `PUT /api/devices/:id`: Update a device
-- `DELETE /api/devices/:id`: Delete a device
+## Anomaly Detection
 
-## Dependencies
+FarmPulse includes AI-powered anomaly detection:
 
-### Backend
-- Express.js: Web server framework
-- WebSocket: Real-time communication
-- InfluxDB Client: Time-series database client
-- MongoDB: Document database
-- Better-SQLite3: Local database for testing
-- Dotenv: Environment variable management
+- **Temperature Analysis**: Detects fever and hypothermia
+- **Heart Rate Monitoring**: Alerts for tachycardia or bradycardia
+- **Activity Analysis**: Identifies abnormal activity patterns
+- **Pregnancy Monitoring**: Special algorithms for pregnant cattle
 
-### Frontend
-- React: UI library
-- Vite: Build tool
-- TypeScript: Type-safe JavaScript
-- Tailwind CSS: Utility-first CSS framework
-- shadcn/ui: UI component library
-- Recharts: Charting library
-- React Router: Client-side routing
+When an anomaly is detected, the system:
+
+1. Displays an alert on the dashboard
+2. Stores the anomaly in the database for review
+3. Provides contextual information about the potential issue
+
+## Troubleshooting
+
+### Common Issues
+
+#### WebSocket Connection Problems
+
+- **Problem**: Dashboard shows "Disconnected"
+- **Solution**: 
+  1. Ensure backend server is running
+  2. Check that WebSocket URL is configured correctly (`ws://localhost:3001`)
+  3. Use `npm run test:ws` to diagnose connection issues
+
+#### No Data Appearing
+
+- **Problem**: Connected but no data shows
+- **Solution**:
+  1. Verify simulator is running and connected
+  2. Ensure simulator and dashboard are using the same animal ID
+  3. Check browser console for errors
+
+#### Database Errors
+
+- **Problem**: "Cannot connect to database" errors
+- **Solution**:
+  - For MongoDB issues: Ensure MongoDB is running or set `USE_SQLITE=true` in .env
+  - For InfluxDB: Set up InfluxDB or the system will fall back to limited functionality
+
+## Development
+
+### Project Structure
+
+```
+farmpulse/
+├── src/
+│   ├── backend/            # Backend server code
+│   │   ├── api/            # REST API routes
+│   │   ├── db/             # Database configurations
+│   │   ├── middleware/     # Auth and middleware
+│   │   ├── ml/             # Anomaly detection and ML
+│   │   ├── tools/          # Simulation and utilities
+│   │   ├── utils/          # Helper functions
+│   │   └── websocket/      # WebSocket server
+│   ├── components/         # React components
+│   │   ├── Dashboard/      # Dashboard components
+│   │   └── ui/             # UI components
+│   ├── hooks/              # Custom React hooks
+│   ├── lib/                # Utility functions
+│   └── pages/              # Page components
+├── public/                 # Static assets
+│   └── ...
+├── .env                    # Environment variables
+├── package.json            # Dependencies and scripts
+├── vite.config.ts          # Vite configuration
+└── README.md               # Project documentation
+```
+
+### Available Scripts
+
+- `npm run dev`: Start frontend development server
+- `npm run backend`: Start backend server
+- `npm run start`: Start both frontend and backend
+- `npm run build`: Build for production
+- `npm run simulate`: Run basic simulator
+- `npm run simulate:enhanced`: Run advanced simulator with scenarios
+- `npm run test:ws`: Test WebSocket connectivity
 
 ## License
+
+Copyright © 2025 FarmPulse Technologies
 
 This project is licensed under the MIT License - see the LICENSE file for details.
