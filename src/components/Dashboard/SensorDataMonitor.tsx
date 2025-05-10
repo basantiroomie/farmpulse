@@ -13,13 +13,13 @@ const SensorDataMonitor = ({ animalId }: SensorDataMonitorProps) => {
   const [liveData, setLiveData] = useState<any>(null);
   const [simulating, setSimulating] = useState<boolean>(false);
   const { toast } = useToast();
-  
   // WebSocket setup - direct connection to backend server
-  const wsUrl = `ws://localhost:3001?type=dashboard&animalId=${animalId}`;
+  // Add timestamp to avoid browser caching the WebSocket connection
+  const wsUrl = `ws://localhost:3001/?type=dashboard&animalId=${animalId}&t=${Date.now()}`;
   
   useEffect(() => {
     console.log(`Attempting to connect to WebSocket at: ${wsUrl}`);
-  }, [wsUrl]);
+  }, []);
   
   const { connected, sendMessage, lastMessage, connectionError, reconnect } = useWebSocket({
     url: wsUrl,

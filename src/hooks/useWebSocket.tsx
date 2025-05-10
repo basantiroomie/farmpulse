@@ -18,7 +18,7 @@ interface WebSocketHook {
 export default function useWebSocket({
   url,
   onMessage,
-  reconnectDelay = 3000,
+  reconnectDelay = 5000,
   maxReconnectAttempts = 5
 }: WebSocketOptions): WebSocketHook {
   const [connected, setConnected] = useState<boolean>(false);
@@ -28,6 +28,8 @@ export default function useWebSocket({
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectAttemptsRef = useRef<number>(0);
   const reconnectTimeoutRef = useRef<number | undefined>(undefined);
+  const urlRef = useRef<string>(url);
+  const isUnmountingRef = useRef<boolean>(false);
   
   // Function to establish connection
   const connectWebSocket = useCallback(() => {
@@ -37,7 +39,21 @@ export default function useWebSocket({
         return;
       }
       
+      // If we're unmounting, don't try to connect
+      if (isUnmountingRef.current) {
+        return;
+      }
+      
       console.log(`Connecting to WebSocket: ${url}`);
+      
+      // Clean up any existing connection first
+      if (wsRef.current) {
+        try {
+          wsRef.current.close(1000, "Creating new connection");
+        } catch (e) {
+          // Ignore errors on closing
+        }
+      }
       
       // Create new WebSocket connection
       wsRef.current = new WebSocket(url);
@@ -69,22 +85,38 @@ export default function useWebSocket({
       };
       
       wsRef.current.onclose = (event) => {
-        console.log(`WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason}`);
+        console.log(`WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason || 'Unknown reason'}`);
         setConnected(false);
         
-        // Attempt to reconnect if not a clean close
-        if (!event.wasClean && reconnectAttemptsRef.current < maxReconnectAttempts) {
+        // Don't attempt to reconnect if we're unmounting or the connection was closed intentionally
+        if (isUnmountingRef.current || event.wasClean) {
+          console.log("Clean close or unmounting, not attempting to reconnect");
+          return;
+        }
+        
+        // Attempt to reconnect if we haven't exceeded max attempts
+        if (reconnectAttemptsRef.current < maxReconnectAttempts) {
           reconnectAttemptsRef.current += 1;
           console.log(`Attempting to reconnect (${reconnectAttemptsRef.current}/${maxReconnectAttempts})...`);
           
+          // Clear any existing timeout
+          if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current);
+          }
+          
+          // Set a new timeout for reconnection with exponential backoff
+          const delay = reconnectDelay * Math.pow(1.5, reconnectAttemptsRef.current - 1);
+          console.log(`Reconnecting in ${delay}ms`);
+          
           reconnectTimeoutRef.current = window.setTimeout(() => {
-            connectWebSocket();
-          }, reconnectDelay);
+            if (!isUnmountingRef.current) {
+              connectWebSocket();
+            }
+          }, delay);
         } else if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
           setConnectionError(`Failed to connect after ${maxReconnectAttempts} attempts`);
         }
-      };
-    } catch (error) {
+      };    } catch (error) {
       console.error("Failed to create WebSocket connection:", error);
       setConnectionError("Failed to create connection");
     }
@@ -103,7 +135,12 @@ export default function useWebSocket({
   // Function to manually reconnect
   const reconnect = useCallback(() => {
     if (wsRef.current) {
-      wsRef.current.close();
+      try {
+        wsRef.current.close(1000, "Manual reconnection");
+      } catch (e) {
+        // Ignore errors on closing
+      }
+      wsRef.current = null;
     }
     
     // Reset reconnect attempts
@@ -116,23 +153,53 @@ export default function useWebSocket({
     
     // Connect again
     connectWebSocket();
-  }, [connectWebSocket]);
-  
-  // Connect on mount, disconnect on unmount
+  }, [connectWebSocket]);  // Connect on mount, disconnect on unmount
   useEffect(() => {
-    connectWebSocket();
+    // Store the URL to prevent unnecessary reconnections
+    if (urlRef.current !== url) {
+      urlRef.current = url;
+      
+      // Clean up existing connection before creating a new one for different URL
+      if (wsRef.current) {
+        try {
+          wsRef.current.close(1000, "URL changed");
+        } catch (e) {
+          // Ignore errors on closing
+        }
+        wsRef.current = null;
+      }
+    }
+    
+    // Reset unmounting flag when mounting
+    isUnmountingRef.current = false;
+    
+    // Only connect if we don't already have an active connection
+    if (!wsRef.current || wsRef.current.readyState === WebSocket.CLOSED) {
+      connectWebSocket();
+    }
     
     // Cleanup on unmount
     return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
+      console.log('Cleaning up WebSocket connection');
+      isUnmountingRef.current = true;
       
+      // Clear any pending reconnect timeout
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
+      
+      // Close the connection
+      if (wsRef.current) {
+        try {
+          const tempWs = wsRef.current;
+          wsRef.current = null;
+          tempWs.close(1000, "Component unmounting");
+        } catch (e) {
+          console.error("Error closing WebSocket connection:", e);
+        }
+      }
     };
-  }, [connectWebSocket]);
+  }, [url, connectWebSocket]);
   
   return {
     connected,

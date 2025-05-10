@@ -24,13 +24,29 @@ export function initWebSocketServer(server) {
   // Log details about the server
   console.log(`WebSocket path: ws://localhost:${server.address()?.port || '3001'}`);
   
-  wss.on('connection', async (ws, req) => {
-    // Log connection details
+  wss.on('connection', async (ws, req) => {    // Log connection details
     console.log(`WebSocket connection received from ${req.socket.remoteAddress}`);
     console.log(`Connection URL: ${req.url}`);
+      // Extract query parameters - properly handling various URL formats
+    let url;
+    try {
+      // First try to parse the URL directly
+      const normalizedUrl = req.url.startsWith('/') ? req.url : '/' + req.url;
+      url = new URL(normalizedUrl, 'http://localhost');
+    } catch (error) {
+      // If that fails, try to extract the query string manually
+      console.warn(`Failed to parse URL ${req.url}, attempting manual parsing`);
+      // Extract only the query part of the URL (remove the path part)
+      const parts = req.url.split('?');
+      const queryString = parts.length > 1 ? parts[1] : '';
+      url = new URL(`http://localhost/?${queryString}`);
+    }
     
-    // Extract query parameters
-    const url = new URL(req.url, 'http://localhost');
+    // Remove any timestamp parameters used to prevent caching
+    const t = url.searchParams.get('t');
+    if (t) {
+      console.log(`Connection has timestamp: ${t} (anti-cache mechanism)`);
+    }
     const deviceId = url.searchParams.get('deviceId');
     const apiKey = url.searchParams.get('apiKey');
     const clientType = url.searchParams.get('type') || 'device';
@@ -174,15 +190,26 @@ export function initWebSocketServer(server) {
         }));
       }
     });
-    
-    // Handle disconnection
-    ws.on('close', () => {
+      // Handle disconnection
+    ws.on('close', (code, reason) => {
       if (ws.clientType === 'dashboard') {
         clients.delete(ws.id);
-        console.log('Dashboard client disconnected');
+        console.log(`Dashboard client disconnected with code ${code}${reason ? ': ' + reason : ''}`);
       } else if (ws.clientType === 'device' || ws.clientType === 'simulator') {
         clients.delete(ws.deviceId);
-        console.log(`Device disconnected: ${ws.deviceId}`);
+        console.log(`Device disconnected: ${ws.deviceId} with code ${code}${reason ? ': ' + reason : ''}`);
+      }
+    });
+    
+    // Handle connection errors
+    ws.on('error', (error) => {
+      console.error('WebSocket connection error:', error.message);
+      if (ws.clientType === 'dashboard') {
+        clients.delete(ws.id);
+        console.log('Dashboard client error, removing from clients');
+      } else if (ws.clientType === 'device' || ws.clientType === 'simulator') {
+        clients.delete(ws.deviceId);
+        console.log(`Device error, removing from clients: ${ws.deviceId}`);
       }
     });
   });

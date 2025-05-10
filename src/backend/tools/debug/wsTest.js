@@ -28,7 +28,7 @@ const DEFAULT_PARAMS = {
   useProxy: false,
   queryParams: {
     type: 'dashboard',
-    animalId: 'CATTLE001'
+    animalId: 'A12348'
   }
 };
 
